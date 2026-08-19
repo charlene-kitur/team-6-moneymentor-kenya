@@ -1,7 +1,7 @@
  Team Charter
 1. Team 6
 
-**Team name:** Team 6
+Team name: Team 6
 
 | Member | Starting role |
 |---|---|
@@ -175,8 +175,6 @@ The current application does not collect or store:
 
 4. Ring Position
 
-**We will consume from:** [Team name or number]
+We will consume from: [Team 5]
 
-**Our work will be consumed by:** [Team name or number]
-
-This position was confirmed using the ring diagram provided in the course space.
+Our work will be consumed by: [Team 7]
