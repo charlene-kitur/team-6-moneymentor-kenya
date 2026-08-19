@@ -6,10 +6,10 @@ Team name: Team 6
 
 | Member | Starting role |
 |---|---|
-| [Daniella Muita] | [Integration/QA Lead] |
-| [Ryan Njuguna] | [API Lead] |
-| [Jasmine Kilemi] | [Docs/DevOps Lead] |
-| [Charlene Kitur] | [Backend Dev(s)] |
+| [Daniella Muita-218835] | [Integration/QA Lead] |
+| [Ryan Njuguna-220788] | [API Lead] |
+| [Jasmine Kilemi-219804] | [Docs/DevOps Lead] |
+| [Charlene Kitur-220983] | [Backend Dev(s)] |
 
  2. Existing Application
 
