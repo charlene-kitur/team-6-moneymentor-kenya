@@ -1,5 +1,6 @@
  Team Charter
 1. Team 6
+github:https://github.com/charlene-kitur/team-6-moneymentor-kenya.git
 
 Team name: Team 6
 
