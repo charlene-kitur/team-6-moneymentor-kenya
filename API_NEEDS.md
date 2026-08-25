@@ -1,3 +1,8 @@
+Daniella Muita-218835
+Ryan Njuguna-220788
+Jasmine Kilemi-219804
+Charlene Kitur-220983
+
 # Week 2: API Needs Statements
 
 ## Needs Statements
