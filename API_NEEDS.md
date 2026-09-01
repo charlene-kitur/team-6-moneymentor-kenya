@@ -1,19 +1,59 @@
+ Week 2: API NEEDS STATEMENTS
+
+TEAM MEMBERS
 Daniella Muita-218835
 Ryan Njuguna-220788
 Jasmine Kilemi-219804
 Charlene Kitur-220983
 
-# Week 2: API Needs Statements
+ NEEDS STATEMENTS
 
-## Needs Statements
-1. HandyNear does not need to read or write financial data from MoneyMentor Kenya, because their app does not track handyman earnings or customer budgets.
-2. HandyNear does not need access to expense or savings information, because these resources do not map to HandyNear’s core entities (Users, Handymen, Services, Bookings, Reviews, Categories).
-3. HandyNear does not require real-time or periodic financial updates, because financial tracking is not part of their provider or customer workflows.
+1. Monthly Income Summary
 
-## Reflection
-We were surprised that our downstream partner had no API needs from us at all. We expected at least some overlap, such as handyman income tracking or customer budgeting, but HandyNear clarified that these features are out of scope for their current project. This highlighted the importance of asking direct questions — instead of assuming integration, we learned that our API will not be consumed by HandyNear in Week 2–3. The exercise showed us that documenting “no needs” is just as valuable as documenting specific ones, because it prevents wasted effort building endpoints nobody will use.
+HandyNear needs to read a handyman's monthly income summary from MoneyMentor Kenya in order to display earnings insights on provider dashboards.
 
-## Audit Check (Week 1 vs. HandyNear)
-- None of MoneyMentor Kenya’s Week 1 resources (income, expenses, savings, investments, contact form) map to HandyNear’s core entities (Users, Handymen, Services, Bookings, Reviews, Categories).
-- This means HandyNear has no API needs from MoneyMentor Kenya in Week 2–3.
-- Gap flagged: our app’s financial resources are not consumed by HandyNear. We will raise this with the instructor as advised in Part E.
+- Freshness: Updated daily is sufficient
+- Volume: Once per dashboard load
+- Authentication: Yes, provider authentication is required
+
+2. Expense Records
+
+HandyNear needs to create and update expense records in MoneyMentor Kenya in order to let handymen track their costs alongside booking revenue.
+
+- Freshness:Real-time updates are preferred
+- Volume:Occasional, whenever a handyman logs or updates an expense
+- Authentication:Yes, provider authentication is required
+
+3. Savings Goal Progress
+
+HandyNear needs to read a handyman's savings-goal progress from MoneyMentor Kenya in order to show financial milestones inside the provider dashboard.
+
+- Freshness: Updates within one hour are acceptable
+- Volume:Once per dashboard load
+- Authentication: Yes, provider authentication is required
+
+ 4. Investment Growth Projections
+
+HandyNear needs to read investment-growth projections from MoneyMentor Kenya in order to provide handymen with long-term financial-planning tools.
+
+- Freshness: Weekly updates are sufficient
+- Volume: Occasional, when a handyman checks projections
+- Authentication: Yes, provider authentication is required
+
+REFLECTION
+
+Our discussion with HandyNear identified meaningful integration points between the two applications. HandyNear can use financial information from MoneyMentor Kenya to complement its booking and service-provider workflows.
+
+Monthly income summaries can provide earnings insights, while expense records can help handymen compare their costs with booking revenue. Savings-goal progress and investment projections can give providers access to broader financial-planning information through their HandyNear dashboards.
+
+This exercise showed the importance of discussing possible workflows directly with the downstream partner. Our original audit found no integration needs, but further discussion revealed several useful and realistic API requirements.
+
+AUDIT CHECK: WEEK 1 VS. HANDYNEAR
+
+The following MoneyMentor Kenya resources now map to HandyNear workflows:
+
+- Income summaries map to handyman earnings insights.
+- Expense records map to provider business-cost tracking.
+- Savings goals map to financial milestones.
+- Investment projections map to long-term financial planning.
+
