@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 const API_URL = 'http://localhost:5000/api';
-const HANDYMAN_ID = 1;
 
 const createEmptyForm = () => ({
   category: '',
@@ -24,7 +23,7 @@ function ExpenseTracker() {
       setError('');
 
       const response = await fetch(
-        `${API_URL}/handymen/${HANDYMAN_ID}/expenses`
+        `${API_URL}/expenses`
       );
 
       if (!response.ok) {
@@ -61,15 +60,20 @@ function ExpenseTracker() {
       setError('');
 
       const url = editingId
-        ? `${API_URL}/expenses/${editingId}`
-        : `${API_URL}/handymen/${HANDYMAN_ID}/expenses`;
+         ? `${API_URL}/expenses/${editingId}`
+  : `${API_URL}/expenses`;
 
       const response = await fetch(url, {
         method: editingId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+  category: form.category,
+  description: form.description,
+  amount: Number(form.amount),
+  expense_date: form.expenseDate,
+}),
       });
 
       const data = await response.json();
@@ -127,14 +131,22 @@ function ExpenseTracker() {
 
             <div className="form-group">
               <label htmlFor="expense-category">Category</label>
-              <input
-                id="expense-category"
-                name="category"
-                type="text"
-                value={form.category}
-                onChange={handleChange}
-                required
-              />
+              <select
+  id="expense-category"
+  name="category"
+  value={form.category}
+  onChange={handleChange}
+  required
+>
+  <option value="">Select a category</option>
+  <option value="Housing">Housing</option>
+  <option value="Food">Food</option>
+  <option value="Transport">Transport</option>
+  <option value="Utilities">Utilities</option>
+  <option value="Education">Education</option>
+  <option value="Health">Health</option>
+  <option value="Other">Other</option>
+</select>
             </div>
 
             <div className="form-group">

@@ -30,6 +30,52 @@ function createApp(db) {
       res.status(201).json({ id: result.insertId, description: description.trim(), category, amount, expense_date });
     } catch (error) { next(error); }
   });
+    app.patch('/api/expenses/:expenseId', async (req, res, next) => {
+    if (!validExpense(req.body)) {
+      return res.status(400).json({
+        error:
+          'Enter a description, category, positive amount (up to two decimals), and valid date.',
+      });
+    }
+
+    const { expenseId } = req.params;
+    const { description, category, amount, expense_date } = req.body;
+
+    try {
+      const [result] = await db.execute(
+        `UPDATE expenses
+         SET description = ?,
+             category = ?,
+             amount = ?,
+             expense_date = ?
+         WHERE id = ?`,
+        [
+          description.trim(),
+          category,
+          amount,
+          expense_date,
+          expenseId,
+        ]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          error: 'Expense not found',
+        });
+      }
+
+      const [rows] = await db.query(
+        `SELECT id, description, category, amount, expense_date
+         FROM expenses
+         WHERE id = ?`,
+        [expenseId]
+      );
+
+      res.status(200).json(rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  });
   const money = (value, positive = false) => typeof value === 'number' && Number.isFinite(value) && value >= (positive ? 0.01 : 0) && value <= 9999999999.99 && Math.abs(value * 100 - Math.round(value * 100)) < 0.0001;
   for (const resource of [
     { path: 'budgets', table: 'budgets', fields: ['income', 'fixed', 'variable'] },
