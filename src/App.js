@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import ExpenseTracker from './ExpenseTracker';
 
 function App() {
   // ===== STATE =====
@@ -207,6 +208,11 @@ function App() {
             <li><a href="#calculator" onClick={() => setMenuOpen(false)}><i className="fas fa-calculator"></i> Budget</a></li>
             <li><a href="#planner" onClick={() => setMenuOpen(false)}><i className="fas fa-bullseye"></i> Planner</a></li>
             <li><a href="#invest" onClick={() => setMenuOpen(false)}><i className="fas fa-chart-line"></i> Invest</a></li>
+            <li>
+    <a href="#expenses" onClick={() => setMenuOpen(false)}>
+      <i className="fas fa-receipt"></i> Expenses
+    </a>
+  </li>
             <li><a href="#resources" onClick={() => setMenuOpen(false)}><i className="fas fa-podcast"></i> Resources</a></li>
             <li><a href="#contact" onClick={() => setMenuOpen(false)}><i className="fas fa-envelope"></i> Contact</a></li>
           </ul>
@@ -547,6 +553,9 @@ function App() {
           </div>
         </div>
       </section>
+
+ {/* ======== EXPENSE TRACKER ======== */}
+      <ExpenseTracker />
 
       {/* ======== CONTACT / ASK AN EXPERT ======== */}
       <section id="contact">
