@@ -1,0 +1,331 @@
+openapi: 3.0.3
+
+info:
+  title: MoneyMentor Kenya API
+  version: 1.0.0
+  description: >
+    API that allows HandyNear providers to access income summaries,
+    manage expenses, monitor savings goals, and view investment projections.
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /handymen/{handymanId}/income-summaries:
+    get:
+      summary: Get a handyman's monthly income summary
+      operationId: getMonthlyIncomeSummary
+      tags:
+        - Income
+      parameters:
+        - $ref: "#/components/parameters/HandymanId"
+        - name: month
+          in: query
+          required: true
+          description: Month being requested
+          schema:
+            type: string
+            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+            example: "2026-09"
+      responses:
+        "200":
+          description: Monthly income summary returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /handymen/{handymanId}/expenses:
+    post:
+      summary: Create an expense
+      operationId: createExpense
+      tags:
+        - Expenses
+      parameters:
+        - $ref: "#/components/parameters/HandymanId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Expense created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /expenses/{expenseId}:
+    patch:
+      summary: Update an existing expense
+      operationId: updateExpense
+      tags:
+        - Expenses
+      parameters:
+        - name: expenseId
+          in: path
+          required: true
+          description: Unique expense identifier
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "200":
+          description: Expense updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /handymen/{handymanId}/savings-goals:
+    get:
+      summary: Get a handyman's savings-goal progress
+      operationId: getSavingsGoalProgress
+      tags:
+        - Savings
+      parameters:
+        - $ref: "#/components/parameters/HandymanId"
+      responses:
+        "200":
+          description: Savings-goal progress returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavingsGoal"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /handymen/{handymanId}/investment-projections:
+    get:
+      summary: Get investment growth projections
+      operationId: getInvestmentProjections
+      tags:
+        - Investments
+      parameters:
+        - $ref: "#/components/parameters/HandymanId"
+      responses:
+        "200":
+          description: Investment projections returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvestmentProjection"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    HandymanId:
+      name: handymanId
+      in: path
+      required: true
+      description: Unique HandyNear provider identifier
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+
+  schemas:
+    ExpenseInput:
+      type: object
+      required:
+        - description
+        - category
+        - amount
+        - expense_date
+      properties:
+        description:
+          type: string
+          maxLength: 200
+          example: Purchased replacement tools
+        category:
+          type: string
+          maxLength: 40
+          example: Equipment
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 2500.00
+        expense_date:
+          type: string
+          format: date
+          example: "2026-09-09"
+
+    Expense:
+      allOf:
+        - type: object
+          required:
+            - id
+            - handyman_id
+          properties:
+            id:
+              type: integer
+              example: 12
+            handyman_id:
+              type: integer
+              example: 4
+        - $ref: "#/components/schemas/ExpenseInput"
+
+    IncomeSummary:
+      type: object
+      properties:
+        handyman_id:
+          type: integer
+          example: 4
+        month:
+          type: string
+          example: "2026-09"
+        total_income:
+          type: number
+          format: double
+          example: 85000.00
+        total_expenses:
+          type: number
+          format: double
+          example: 21500.00
+        net_income:
+          type: number
+          format: double
+          example: 63500.00
+      required:
+        - handyman_id
+        - month
+        - total_income
+        - total_expenses
+        - net_income
+
+    SavingsGoal:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        handyman_id:
+          type: integer
+          example: 4
+        goal_amount:
+          type: number
+          format: double
+          example: 100000.00
+        current_amount:
+          type: number
+          format: double
+          example: 45000.00
+        progress_percentage:
+          type: number
+          format: double
+          example: 45
+      required:
+        - id
+        - handyman_id
+        - goal_amount
+        - current_amount
+        - progress_percentage
+
+    InvestmentProjection:
+      type: object
+      properties:
+        handyman_id:
+          type: integer
+          example: 4
+        initial_amount:
+          type: number
+          format: double
+          example: 50000.00
+        monthly_contribution:
+          type: number
+          format: double
+          example: 5000.00
+        annual_rate:
+          type: number
+          format: double
+          example: 8
+        years:
+          type: integer
+          example: 5
+        projected_value:
+          type: number
+          format: double
+          example: 440000.00
+      required:
+        - handyman_id
+        - initial_amount
+        - monthly_contribution
+        - annual_rate
+        - years
+        - projected_value
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: An error occurred
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    Unauthorized:
+      description: Authentication is required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    NotFound:
+      description: Requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
