@@ -7,6 +7,7 @@
 | PATCH | `/expenses/{expenseId}` | Update an existing expense record's amount, category, date or description. | Update expense records |
 | GET | `/handymen/{handymanId}/savings-goals` | Return the handyman's savings goals and current progress. | Savings-goal progress |
 | GET | `/handymen/{handymanId}/investment-projections` | Return investment-growth projections for long-term financial planning. | Investment-growth projections |
+| DELETE | `/expenses/{expenseId}` | Delete an existing expense record. | Delete expense records |
 
 AUTHENTICATION
 
