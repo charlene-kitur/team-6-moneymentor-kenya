@@ -105,7 +105,29 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
-
+    delete:
+      summary: Delete an existing expense
+      operationId: deleteExpense
+      tags:
+        - Expenses
+      parameters:
+        - name: expenseId
+          in: path
+          required: true
+          description: Unique expense identifier
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        "204":
+          description: Expense deleted successfully; no response body
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /handymen/{handymanId}/savings-goals:
     get:
       summary: Get a handyman's savings-goal progress
