@@ -20,6 +20,34 @@ test('real MySQL read, insert, validation, and persistent readback', async () =>
   assert.equal(response.status,201); const saved = await response.json();
   const rows = await (await fetch(url+'/api/expenses')).json();
   assert.deepEqual(rows.find(row=>row.id===saved.id),saved);
+  const patch = payload => fetch(url+'/api/expenses/'+saved.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  response = await patch({amount:1500});
+  assert.equal(response.status,200);
+  const expected = {...saved,amount:1500};
+  assert.deepEqual(await response.json(),expected);
+  for (const payload of [{},[],{amount:'1500'},{amount:-1},{amount:1.001},{description:' '},{category:'invalid'},{expense_date:'2026-02-30'},{id:99}]) {
+   response = await patch(payload);
+   assert.equal(response.status,400);
+   const [unchanged] = await connection.execute('SELECT id, description, category, amount, expense_date FROM expenses WHERE id = ?', [saved.id]);
+   assert.deepEqual(unchanged[0],expected);
+  }
+  response = await patch({amount:1500});
+  assert.equal(response.status,200);
+  response = await fetch(url+'/api/expenses/invalid',{method:'DELETE'});
+  assert.equal(response.status,400);
+  const [[beforeDelete]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
+  assert.equal(beforeDelete.count,1);
+  response = await fetch(url+'/api/expenses/'+saved.id,{method:'DELETE'});
+  assert.equal(response.status,204);
+  assert.equal(await response.text(),'');
+  const [[afterDelete]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
+  assert.equal(afterDelete.count,0);
+  response = await patch({amount:200});
+  assert.equal(response.status,404);
+  const [[stillMissing]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
+  assert.equal(stillMissing.count,0);
+  response = await fetch(url+'/api/expenses/'+saved.id,{method:'DELETE'});
+  assert.equal(response.status,404);
   response = await fetch(url+'/api/expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...sample,amount:-1})});
   assert.equal(response.status,400);
   for (const [resource, payload] of [['budgets', {income:50000,fixed:20000,variable:10000}], ['savings-goals',{goal_amount:100000,monthly_save:5000}]]) {

@@ -30,48 +30,113 @@ function createApp(db) {
       res.status(201).json({ id: result.insertId, description: description.trim(), category, amount, expense_date });
     } catch (error) { next(error); }
   });
-    app.patch('/api/expenses/:expenseId', async (req, res, next) => {
-    if (!validExpense(req.body)) {
+  app.delete('/api/expenses/:expenseId', async (req, res, next) => {
+    const { expenseId } = req.params;
+
+    if (!/^[1-9]\d*$/.test(expenseId)) {
       return res.status(400).json({
-        error:
-          'Enter a description, category, positive amount (up to two decimals), and valid date.',
+        error: 'Expense ID must be a positive integer.'
       });
     }
 
-    const { expenseId } = req.params;
-    const { description, category, amount, expense_date } = req.body;
-
     try {
       const [result] = await db.execute(
-        `UPDATE expenses
-         SET description = ?,
-             category = ?,
-             amount = ?,
-             expense_date = ?
-         WHERE id = ?`,
-        [
-          description.trim(),
-          category,
-          amount,
-          expense_date,
-          expenseId,
-        ]
+        'DELETE FROM expenses WHERE id = ?',
+        [expenseId]
       );
 
       if (result.affectedRows === 0) {
         return res.status(404).json({
-          error: 'Expense not found',
+          error: 'Expense not found.'
         });
       }
 
-      const [rows] = await db.query(
-        `SELECT id, description, category, amount, expense_date
-         FROM expenses
-         WHERE id = ?`,
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+    app.patch('/api/expenses/:expenseId', async (req, res, next) => {
+    const { expenseId } = req.params;
+    const body = req.body;
+    const allowedFields = [
+      'description', 'category', 'amount', 'expense_date'
+    ];
+
+    if (!/^[1-9]\d*$/.test(expenseId)) {
+      return res.status(400).json({
+        error: 'Expense ID must be a positive integer.'
+      });
+    }
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return res.status(400).json({
+        error: 'Send a JSON object containing the fields to update.'
+      });
+    }
+
+    const fields = Object.keys(body);
+
+    if (
+      fields.length === 0 ||
+      fields.some(field => !allowedFields.includes(field))
+    ) {
+      return res.status(400).json({
+        error: 'Supply at least one valid expense field.'
+      });
+    }
+
+    // Defaults allow the existing validator to check a partial update.
+    // Only fields supplied in the request are saved.
+    const validationData = {
+      description: 'Validation placeholder',
+      category: 'Other',
+      amount: 1,
+      expense_date: '2026-01-01',
+      ...body
+    };
+
+    if (!validExpense(validationData)) {
+      return res.status(400).json({
+        error: 'Check the description, category, amount, and date.'
+      });
+    }
+
+    try {
+      const [existing] = await db.execute(
+        'SELECT id FROM expenses WHERE id = ?',
         [expenseId]
       );
 
-      res.status(200).json(rows[0]);
+      if (existing.length === 0) {
+        return res.status(404).json({
+          error: 'Expense not found.'
+        });
+      }
+
+      // Field names come only from the allowlist above.
+      const assignments = fields.map(field => `${field} = ?`).join(', ');
+      const values = fields.map(field =>
+        field === 'description' ? body[field].trim() : body[field]
+      );
+
+      await db.execute(
+        `UPDATE expenses SET ${assignments} WHERE id = ?`,
+        [...values, expenseId]
+      );
+
+      const [updated] = await db.execute(
+        'SELECT id, description, category, amount, expense_date FROM expenses WHERE id = ?',
+        [expenseId]
+      );
+
+      if (updated.length === 0) {
+        return res.status(404).json({
+          error: 'Expense not found.'
+        });
+      }
+
+      return res.status(200).json(updated[0]);
     } catch (error) {
       next(error);
     }
@@ -109,7 +174,10 @@ function createApp(db) {
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });
     if (error.type === 'entity.too.large') return res.status(413).json({ error: 'Request is too large' });
-    console.error('API error:', error.code || error.message);
+    console.error('API error details:', error.code, error.message);
+    if (error.code === 'ER_TABLEACCESS_DENIED_ERROR') {
+      return res.status(500).json({ error: 'Database permissions are not configured for this operation.' });
+    }
     res.status(503).json({ error: 'Database unavailable. Check that MySQL is running and the database has been set up.' });
   });
   return app;
