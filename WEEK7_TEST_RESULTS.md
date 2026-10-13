@@ -69,4 +69,3 @@ The old npm start process, if any, must be restarted from this cloned server to
 load the changes; tests instantiate the current app independently.
 
 ## Next boundary
-Stop here before Part C as requested. No partner activity has been performed.
