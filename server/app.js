@@ -8,7 +8,7 @@ function validExpense(body) {
   const date = new Date(body.expense_date);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === body.expense_date;
 }
-function createApp(db) {
+function createApp(db, options = {}) {
   const app = express();
   app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
   app.use(express.json({ limit: '16kb' }));
@@ -30,7 +30,7 @@ function createApp(db) {
       res.status(201).json({ id: result.insertId, description: description.trim(), category, amount, expense_date });
     } catch (error) { next(error); }
   });
-  app.delete('/api/expenses/:expenseId', async (req, res, next) => {
+  app.delete('/api/local/expenses/:expenseId', async (req, res, next) => {
     const { expenseId } = req.params;
 
     if (!/^[1-9]\d*$/.test(expenseId)) {
@@ -56,7 +56,7 @@ function createApp(db) {
       next(error);
     }
   });
-    app.patch('/api/expenses/:expenseId', async (req, res, next) => {
+    app.patch('/api/local/expenses/:expenseId', async (req, res, next) => {
     const { expenseId } = req.params;
     const body = req.body;
     const allowedFields = [
@@ -170,6 +170,7 @@ function createApp(db) {
       res.status(201).json({ id: result.insertId, message: 'Question saved.' });
     } catch (error) { next(error); }
   });
+  require('./provider-api').mountProviderApi(app, db, options);
   app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });

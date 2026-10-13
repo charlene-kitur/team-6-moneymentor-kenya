@@ -60,7 +60,7 @@ function ExpenseTracker() {
       setError('');
 
       const url = editingId
-         ? `${API_URL}/expenses/${editingId}`
+         ? `${API_URL}/local/expenses/${editingId}`
   : `${API_URL}/expenses`;
 
       const response = await fetch(url, {

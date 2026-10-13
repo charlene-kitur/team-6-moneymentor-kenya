@@ -1,67 +1,38 @@
-# Contract Deviations — Week 6
+# Contract changes and resolutions ? Week 7 Parts A and B
 
-## Review status
+The six existing provider contract operations are implemented and tested.
+The /api prefix remains in servers.url; it is not duplicated in OpenAPI paths.
 
-The differences below were identified by comparing the
-implementation with ENDPOINT_LIST.md.
+## Resolved implementation gaps
+- Added provider-scoped POST expenses and GET income/savings/investment routes.
+- Provider expense responses contain handyman_id.
+- Provider expense category accepts nonblank text up to 40 characters, including
+  the contract example Equipment. The legacy local tracker retains its enum.
+- Added verified JWT authentication and provider ownership checks.
+- DELETE is implemented with an empty 204 response and missing-row 404.
 
-Comparison with the original openapi.yaml is still pending.
-These entries do not establish that the revised design has
-been approved.
+## Explicit contract clarifications
+- PATCH now references ExpensePatch: at least one supported field, all optional
+  individually, no unknown properties. Omitted values remain unchanged.
+- Expense amount maximum and two-decimal precision match the SQL storage.
+  Description/category must be nonblank; date must be real and year >=1000.
+- Added 400, 404 and 503 outcomes where applicable (invalid ID, missing provider,
+  unavailable database or authentication configuration).
+- JWT uses HS256, subject = provider ID, expiration, issuer and audience checks.
+  Another provider's resource returns 404 to avoid exposing its existence.
+- Documented income monthly aggregation, savings overfunding, and investment
+  monthly compounding with end-of-month contributions and zero-rate behavior.
 
-## 1. Expense creation route and ownership
+These are local project decisions, not claimed instructor approval. Review the
+updated contract before any later partner exchange.
 
-Original listed route:
-POST /handymen/{handymanId}/expenses
+## Local tracker compatibility
+The pre-existing local application remains an extension outside the provider
+contract. Its PATCH/DELETE routes moved to /api/local/expenses/{expenseId}; the
+React editing URL and legacy tests were updated. Provider routes use separate
+provider tables so unauthenticated local routes cannot access provider records.
+Existing local data was not reassigned or deleted.
 
-Implemented route:
-POST /api/expenses
-
-The current implementation is a local, single-user expense
-tracker. It does not associate expenses with a handymanId.
-
-This changes both the route and the ownership model; it is
-not only a URL-prefix change.
-
-Required resolution:
-Implement the original contract, or confirm the revised scope
-and update openapi.yaml accordingly.
-
-## 2. Expense update and delete paths
-
-Original listed routes:
-PATCH /expenses/{expenseId}
-DELETE /expenses/{expenseId}
-
-Implemented routes:
-PATCH /api/expenses/{expenseId}
-DELETE /api/expenses/{expenseId}
-
-The implementation uses the /api prefix consistently with
-the existing backend routes.
-
-Required resolution:
-Confirm whether /api belongs in the OpenAPI server URL or
-in its path definitions, then align the documentation.
-
-## 3. Expense request fields and validation
-
-The implementation uses:
-description, category, amount, expense_date.
-
-Required resolution:
-Compare these exact names, types, required fields, enum values,
-limits, and date format with openapi.yaml.
-
-## 4. Status codes and response bodies
-
-Implemented outcomes:
-- POST success: 201 with the created expense.
-- PATCH success: 200 with the updated expense.
-- DELETE success: 204 with no body.
-- Invalid input: 400 with an error message.
-- Missing expense on PATCH or DELETE: 404.
-
-Required resolution:
-Verify that the OpenAPI response schemas match these responses,
-including the use of the "error" field in error bodies.
+No public login endpoint was invented. A local administrator CLI can provision
+providers and issue expiring development tokens. Live HandyNear integration is
+outside these lab Parts A and B.

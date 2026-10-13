@@ -28,8 +28,8 @@ The API must confirm that the provider has permission to access the requested ha
 
 REVISIONS AFTER PEER REVIEW
 
-- We did not add `DELETE /expenses/{expenseId}` because HandyNear did not confirm a need to delete expense records.
+- DELETE was initially deferred; it was added to the endpoint list and OpenAPI contract in Week 6 and is now implemented with provider ownership checks.
 - We did not add `GET /expenses/{expenseId}` because HandyNear's confirmed need only requires creating and updating expenses.
-- Adding either endpoint would violate the requirement that every endpoint trace back to a confirmed line in `API_NEEDS.md`.
+- The single-item GET remains deferred; the current contract contains six operations.
 - No pluralization or nesting changes were required.
 - We clarified the investment-projections purpose to explain how HandyNear will use the returned information.

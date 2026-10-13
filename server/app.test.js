@@ -20,7 +20,7 @@ test('real MySQL read, insert, validation, and persistent readback', async () =>
   assert.equal(response.status,201); const saved = await response.json();
   const rows = await (await fetch(url+'/api/expenses')).json();
   assert.deepEqual(rows.find(row=>row.id===saved.id),saved);
-  const patch = payload => fetch(url+'/api/expenses/'+saved.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const patch = payload => fetch(url+'/api/local/expenses/'+saved.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   response = await patch({amount:1500});
   assert.equal(response.status,200);
   const expected = {...saved,amount:1500};
@@ -33,11 +33,11 @@ test('real MySQL read, insert, validation, and persistent readback', async () =>
   }
   response = await patch({amount:1500});
   assert.equal(response.status,200);
-  response = await fetch(url+'/api/expenses/invalid',{method:'DELETE'});
+  response = await fetch(url+'/api/local/expenses/invalid',{method:'DELETE'});
   assert.equal(response.status,400);
   const [[beforeDelete]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
   assert.equal(beforeDelete.count,1);
-  response = await fetch(url+'/api/expenses/'+saved.id,{method:'DELETE'});
+  response = await fetch(url+'/api/local/expenses/'+saved.id,{method:'DELETE'});
   assert.equal(response.status,204);
   assert.equal(await response.text(),'');
   const [[afterDelete]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
@@ -46,7 +46,7 @@ test('real MySQL read, insert, validation, and persistent readback', async () =>
   assert.equal(response.status,404);
   const [[stillMissing]] = await connection.execute('SELECT COUNT(*) AS count FROM expenses WHERE id = ?', [saved.id]);
   assert.equal(stillMissing.count,0);
-  response = await fetch(url+'/api/expenses/'+saved.id,{method:'DELETE'});
+  response = await fetch(url+'/api/local/expenses/'+saved.id,{method:'DELETE'});
   assert.equal(response.status,404);
   response = await fetch(url+'/api/expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...sample,amount:-1})});
   assert.equal(response.status,400);

@@ -10,6 +10,7 @@ async function setup() {
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\``);
     await connection.query(`USE \`${database}\``);
     for (const statement of fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8').split(';').filter(sql => sql.trim())) await connection.query(statement);
+    for (const statement of fs.readFileSync(path.join(__dirname, 'provider-schema.sql'), 'utf8').split(';').filter(sql => sql.trim())) await connection.query(statement);
     const [[{ count }]] = await connection.query('SELECT COUNT(*) AS count FROM expenses');
     if (!count) await connection.execute('INSERT INTO expenses (description, category, amount, expense_date) VALUES (?, ?, ?, CURRENT_DATE), (?, ?, ?, CURRENT_DATE), (?, ?, ?, CURRENT_DATE)', ['Sample: monthly rent', 'Housing', 15000, 'Sample: groceries', 'Food', 3500, 'Sample: bus fare', 'Transport', 1200]);
     console.log('MoneyMentor database is ready. Sample expenses are labelled Sample.');
