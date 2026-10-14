@@ -43,18 +43,37 @@ function App() {
   }, []);
 
   // ===== BUDGET CALCULATOR =====
-  const handleCalculateBudget = () => {
-    if (income <= 0) {
-      setToast({ type: 'error', message: 'Please enter a valid income.' });
-      setTimeout(() => setToast(null), 3000);
-      return;
-    }
+  const handleCalculateBudget = async () => {
+  if (income <= 0 || fixed < 0 || variable < 0) {
+    setToast({ type: 'error', message: 'Please enter valid amounts.' });
+    setTimeout(() => setToast(null), 3000);
+    return;
+  }
 
-    const totalExpenses = fixed + variable;
-    const remaining = income - totalExpenses;
-    const needs = income * 0.5;
-    const wants = income * 0.3;
-    const savings = income * 0.2;
+  const totalExpenses = fixed + variable;
+  const remaining = income - totalExpenses;
+  const needs = income * 0.5;
+  const wants = income * 0.3;
+  const savings = income * 0.2;
+
+  try {
+    const response = await fetch('http://localhost:5000/api/budgets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        income: Number(income),
+        fixed: Number(fixed),
+        variable: Number(variable),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to save budget');
+    }
 
     setBudgetData({
       needs,
@@ -62,41 +81,104 @@ function App() {
       savings,
       remaining,
       totalExpenses,
-      isOverSpending: remaining < 0
+      isOverSpending: remaining < 0,
     });
+
     setShowResult(true);
-    setToast({ type: 'success', message: 'Budget calculated successfully!' });
-    setTimeout(() => setToast(null), 3000);
-  };
+    setToast({
+      type: 'success',
+      message: 'Budget calculated and saved!',
+    });
+  } catch (error) {
+    setToast({
+      type: 'error',
+      message: error.message,
+    });
+  }
+
+  setTimeout(() => setToast(null), 3000);
+};
+
 
   // ===== SAVINGS PLANNER =====
-  const handleCalculatePlan = () => {
-    if (goalAmount <= 0 || monthlySave <= 0) {
-      setToast({ type: 'error', message: 'Please enter valid amounts for both fields.' });
-      setTimeout(() => setToast(null), 3000);
-      return;
+  const handleCalculatePlan = async () => {
+  if (goalAmount <= 0 || monthlySave <= 0) {
+    setToast({
+      type: 'error',
+      message: 'Please enter valid amounts for both fields.',
+    });
+    setTimeout(() => setToast(null), 3000);
+    return;
+  }
+
+  const months = Math.ceil(goalAmount / monthlySave);
+  const years = Math.floor(months / 12);
+  const remMonths = months % 12;
+
+  let timeStr = '';
+
+  if (years > 0) {
+    timeStr += `${years} year${years > 1 ? 's' : ''}`;
+  }
+
+  if (remMonths > 0) {
+    timeStr += `${years > 0 ? ' and ' : ''}${remMonths} month${
+      remMonths > 1 ? 's' : ''
+    }`;
+  }
+
+  if (!timeStr) {
+    timeStr = 'less than a month';
+  }
+
+  const progressPercent = Math.min(
+    100,
+    (monthlySave / goalAmount) * 100
+  );
+
+  try {
+    const response = await fetch(
+      'http://localhost:5000/api/savings-goals',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goal_amount: Number(goalAmount),
+          monthly_save: Number(monthlySave),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to save savings goal');
     }
 
-    const months = Math.ceil(goalAmount / monthlySave);
-    const years = Math.floor(months / 12);
-    const remMonths = months % 12;
-    let timeStr = '';
-    if (years > 0) timeStr += `${years} year${years > 1 ? 's' : ''}`;
-    if (remMonths > 0) timeStr += `${years > 0 ? ' and ' : ''}${remMonths} month${remMonths > 1 ? 's' : ''}`;
-    if (!timeStr) timeStr = 'less than a month';
-
-    const progressPercent = Math.min(100, (monthlySave / goalAmount) * 100);
     setProgress(progressPercent);
 
     setPlanResult({
       months,
       timeStr,
       totalSaved: monthlySave * months,
-      progressPercent
+      progressPercent,
     });
-    setToast({ type: 'success', message: 'Savings plan calculated!' });
-    setTimeout(() => setToast(null), 3000);
-  };
+
+    setToast({
+      type: 'success',
+      message: 'Savings plan calculated and saved!',
+    });
+  } catch (error) {
+    setToast({
+      type: 'error',
+      message: error.message,
+    });
+  }
+
+  setTimeout(() => setToast(null), 3000);
+};
 
   // ===== INVESTMENT CALCULATOR =====
   const calculateInvestment = () => {
