@@ -1,3 +1,12 @@
+## Week 8 quickstart and offline reference
+
+For a clean clone, use the [root README](../README.md). It includes the isolated
+demo setup, token commands and all six request/response examples. Open
+[docs/index.html](../docs/index.html) directly in a browser for the offline API
+reference. `npm.cmd run docs:build` regenerates it; with the demo API running,
+`npm.cmd run docs:verify` checks the examples. The older setup notes below apply
+to the normal project database, not the isolated demo.
+
 # MoneyMentor API ? local setup and Week 7 tests
 
 ## Existing computer

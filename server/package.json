@@ -7,7 +7,12 @@
     "dev": "nodemon index.js",
     "db:setup": "node setup-db.js",
     "test": "jest --runInBand",
-    "test:legacy": "node --test app.test.js"
+    "test:legacy": "node --test app.test.js",
+    "demo:setup": "node setup-demo.js",
+    "start:demo": "node demo-start.js",
+    "docs:build": "node build-docs.js",
+    "test:demo": "node test-demo.js",
+    "docs:verify": "node verify-docs.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -18,7 +23,9 @@
   },
   "devDependencies": {
     "jest": "^30.5.2",
+    "js-yaml": "^5.4.3",
     "nodemon": "^3.1.10",
-    "supertest": "^7.3.0"
+    "supertest": "^7.3.0",
+    "swagger-ui-dist": "^5.33.2"
   }
 }
