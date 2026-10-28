@@ -1,3 +1,6 @@
+const apiTestKey=require('node:crypto').randomBytes(24).toString('hex');
+process.env.API_KEYS=apiTestKey;
+const fetch=(url,options={})=>globalThis.fetch(url,{...options,headers:{...options.headers,'X-API-Key':apiTestKey}});
 ﻿const test = require('node:test');
 const assert = require('node:assert/strict');
 const { createApp, validExpense } = require('./app');

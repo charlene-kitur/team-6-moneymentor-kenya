@@ -1,0 +1,19 @@
+{
+  "scope": "Local Git --all reachable history; text blobs <=1MB; assignment/JWT patterns only; not exhaustive secret detection",
+  "blobs_checked": 87,
+  "potential_findings": [
+    {
+      "object": "7c3dd12875e0393c24d7ff732f13ac51053b8145",
+      "path": "README.md"
+    },
+    {
+      "object": "6503d3e8642e37f18a7e3e79f21326ce59db1266",
+      "path": "server/.env.example"
+    },
+    {
+      "object": "f09c21693ee596e31bd40213b74290b70abf837d",
+      "path": "server/.env.example"
+    }
+  ],
+  "review": "Three flagged blobs contain placeholder configuration assignments; no confirmed live secret identified by this limited scan. This is not an exhaustive history security certification."
+}

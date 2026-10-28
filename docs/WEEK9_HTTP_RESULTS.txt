@@ -1,0 +1,11 @@
+Week 9 HTTP verification
+2026-10-27T14:16:28.810Z
+Real MySQL database; temporary loopback server. Limit 3 applies only to this instance.
+No key: 401 {"error":"Missing or invalid API key"}
+Wrong key: 401 {"error":"Missing or invalid API key"}
+Public health: 200 {"status":"ok","database":"connected"}
+429 Retry-After: 60; body: {"error":"Rate limit exceeded. Try again later."}
+429 Retry-After: 60; body: {"error":"Rate limit exceeded. Try again later."}
+Own-team key: 200 200 200 429 429
+Separate consumer key: 200 (independent limit)
+Configured deployment limit remains 100/minute. No key values recorded.

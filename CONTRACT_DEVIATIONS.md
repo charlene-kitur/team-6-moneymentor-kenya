@@ -36,3 +36,15 @@ Existing local data was not reassigned or deleted.
 No public login endpoint was invented. A local administrator CLI can provision
 providers and issue expiring development tokens. Live HandyNear integration is
 outside these lab Parts A and B.
+
+## Week 4 contract review follow-up — 27 October 2026
+
+Added explicit JSON schemas/examples for API-key 401 and rate-limit 429 responses,
+and for the public health endpoint's 200/503 responses. Runtime behavior did not
+change. The six provider operations remain intact. Current security requires both
+X-API-Key and bearer authentication for provider routes; this must be communicated
+to HandyNear before relying on its older integration evidence.
+
+Structural OpenAPI validation and local reference resolution passed using
+@apidevtools/swagger-parser. This is not a claim that Swagger Editor's browser
+validation or a live Swagger Try it out session was completed.

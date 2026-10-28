@@ -3,8 +3,8 @@ info:
   title: MoneyMentor Kenya API
   version: 1.0.0
   description: >-
-    API that allows HandyNear providers to access income summaries, manage expenses, monitor savings
-    goals, and view investment projections.
+    API that allows HandyNear providers to access income summaries, manage expenses, monitor savings goals,
+    and view investment projections.
      Contract routes use provider-owned data. Local tracker extensions use separate tables and cannot access provider records.
 servers:
   - url: http://localhost:5001/api
@@ -12,7 +12,8 @@ servers:
   - url: http://localhost:5000/api
     description: Existing local project (npm start)
 security:
-  - bearerAuth: []
+  - apiKeyAuth: []
+    bearerAuth: []
 paths:
   /handymen/{handymanId}/income-summaries:
     get:
@@ -46,9 +47,28 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -64,13 +84,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
       description: >-
-        Sum stored income and expenses for the calendar month, scoped to the authenticated provider.
-        Month uses YYYY-MM, year at least 1000. Empty month totals are zero. net_income =
-        total_income - total_expenses, rounded to two decimals.
+        Sum stored income and expenses for the calendar month, scoped to the authenticated provider. Month
+        uses YYYY-MM, year at least 1000. Empty month totals are zero. net_income = total_income -
+        total_expenses, rounded to two decimals.
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
   /handymen/{handymanId}/expenses:
     post:
       summary: Create an expense
@@ -107,7 +128,13 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
         '413':
@@ -118,6 +145,19 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: Request is too large
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -133,9 +173,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
   /expenses/{expenseId}:
     patch:
       summary: Update an existing expense
@@ -176,7 +217,13 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
         '413':
@@ -187,6 +234,19 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: Request is too large
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -202,12 +262,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
       description: >-
-        Partial update of an owned expense. At least one supported field required. Omitted fields
-        are preserved. Repeated identical updates have the same end state.
+        Partial update of an owned expense. At least one supported field required. Omitted fields are
+        preserved. Repeated identical updates have the same end state.
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
     delete:
       summary: Delete an existing expense
       operationId: deleteExpense
@@ -228,9 +289,28 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -246,9 +326,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
   /handymen/{handymanId}/savings-goals:
     get:
       summary: Get a handyman's savings-goal progress
@@ -275,9 +356,28 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -293,12 +393,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
       description: >-
-        Stored provider goals. Progress = current_amount / goal_amount * 100, rounded to two
-        decimals; overfunding can exceed 100%. No goals returns [].
+        Stored provider goals. Progress = current_amount / goal_amount * 100, rounded to two decimals;
+        overfunding can exceed 100%. No goals returns [].
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
   /handymen/{handymanId}/investment-projections:
     get:
       summary: Get investment growth projections
@@ -326,9 +427,28 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Missing or invalid API key
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          description: More than 100 requests per key per minute. Retry after the indicated delay.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded. Try again later.
         '500':
           description: Database operation denied by its permissions
           content:
@@ -344,13 +464,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: >-
-                  Database unavailable. Check that MySQL is running and the database has been set
-                  up.
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
       description: >-
-        Stored inputs: annual_rate is a percentage from 0 to 100; years is 0 to 100. Monthly
-        compounding with contributions at month end; final value rounded to two decimals. At zero
-        rate: initial_amount + monthly_contribution * 12 * years. No investments returns [].
+        Stored inputs: annual_rate is a percentage from 0 to 100; years is 0 to 100. Monthly compounding with
+        contributions at month end; final value rounded to two decimals. At zero rate: initial_amount +
+        monthly_contribution * 12 * years. No investments returns [].
+      security:
+        - apiKeyAuth: []
+          bearerAuth: []
+  /health:
+    get:
+      summary: Public connectivity check
+      security: []
+      responses:
+        '200':
+          description: API and database connected
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - database
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  database:
+                    type: string
+                    example: connected
+              example:
+                status: ok
+                database: connected
+        '503':
+          description: Database unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Database unavailable. Check that MySQL is running and the database has been set up.
 components:
   securitySchemes:
     bearerAuth:
@@ -358,10 +511,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: >-
-        HS256 JWT. sub is the handyman ID string; exp, iss (moneymentor-local) and aud
-        (moneymentor-api) are required. Missing or invalid token returns 401. Another provider
-        resource returns 404. Local development tokens are issued by an administrator CLI, not a
-        public login endpoint.
+        HS256 JWT. sub is the handyman ID string; exp, iss (moneymentor-local) and aud (moneymentor-api) are
+        required. Missing or invalid token returns 401. Another provider resource returns 404. Local
+        development tokens are issued by an administrator CLI, not a public login endpoint.
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
   parameters:
     HandymanId:
       name: handymanId

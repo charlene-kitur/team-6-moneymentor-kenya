@@ -11,6 +11,7 @@ function validExpense(body) {
 function createApp(db, options = {}) {
   const app = express();
   app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
+  app.use(require('./api-security').apiSecurity(options));
   app.use(express.json({ limit: '16kb' }));
   app.get('/', (req, res) => res.json({ message: 'MoneyMentor API is running' }));
   app.get('/api/health', async (req, res, next) => {
@@ -170,12 +171,13 @@ function createApp(db, options = {}) {
       res.status(201).json({ id: result.insertId, message: 'Question saved.' });
     } catch (error) { next(error); }
   });
+  require('./partner-api').mountPartnerApi(app, options);
   require('./provider-api').mountProviderApi(app, db, options);
   app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });
     if (error.type === 'entity.too.large') return res.status(413).json({ error: 'Request is too large' });
-    console.error('API error details:', error.code, error.message);
+    console.error('API error:', error.code || 'INTERNAL_ERROR');
     if (error.code === 'ER_TABLEACCESS_DENIED_ERROR') {
       return res.status(500).json({ error: 'Database permissions are not configured for this operation.' });
     }
@@ -184,3 +186,4 @@ function createApp(db, options = {}) {
   return app;
 }
 module.exports = { createApp, validExpense };
+

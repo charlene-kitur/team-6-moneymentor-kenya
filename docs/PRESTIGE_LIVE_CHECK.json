@@ -1,0 +1,6 @@
+{
+  "checkedAt": "2026-10-28T04:42:28.443Z",
+  "url": "https://kenneth-resist-boxed-occurrence.trycloudflare.com/claims?status=claimed",
+  "status": 200,
+  "body": "[{\"claimId\":\"1\",\"studentId\":\"SU-1001\",\"itemId\":\"1\",\"status\":\"claimed\",\"rewardAmountCents\":15000}]"
+}

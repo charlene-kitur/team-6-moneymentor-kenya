@@ -12,7 +12,8 @@
     "start:demo": "node demo-start.js",
     "docs:build": "node build-docs.js",
     "test:demo": "node test-demo.js",
-    "docs:verify": "node verify-docs.js"
+    "docs:verify": "node verify-docs.js",
+    "start:web": "node start-web.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

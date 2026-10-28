@@ -1,4 +1,4 @@
-const request = require('supertest');
+const request = require('../test-support/request');
 const { createApp } = require('../app');
 const db = require('../db');
 let connection, app;

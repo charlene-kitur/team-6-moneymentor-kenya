@@ -20,6 +20,65 @@ download the file and open it in a browser to view the rendered page.
 - [OpenAPI source](openapi.yaml)
 - [Backend details and existing-project setup](server/README.md)
 
+## Week 8 key-free quickstart - 26 October 2026
+
+Week 9 supersedes the key-free instructions below: all data requests now require X-API-Key. Provider routes also require the existing bearer token.
+These API-key-protected local-app endpoints supplement the six protected provider operations;
+they do not replace them. For a clean clone, follow setup steps 1-4 below first.
+For an existing demo, keep MySQL and npm.cmd run start:demo running.
+
+In a separate PowerShell terminal:
+
+```powershell
+$base = 'http://127.0.0.1:5001'
+$response = Invoke-WebRequest -UseBasicParsing -Uri "$base/api/health"
+$response.StatusCode
+$response.Content
+```
+
+Captured result on 26 October 2026: HTTP 200
+
+```json
+{"status":"ok","database":"connected"}
+```
+
+Read general expenses:
+
+```powershell
+$response = Invoke-WebRequest -UseBasicParsing -Uri "$base/api/expenses"
+$response.StatusCode
+$response.Content
+```
+
+Captured result: HTTP 200 with 9 records. See the complete actual response in
+[verification evidence](docs/WEEK8_KEY_FREE_RESULTS.json). Counts and IDs vary;
+an empty list [] is a valid success. Provider records use separate tables.
+
+Test validation without saving a record:
+
+```powershell
+try {
+    Invoke-WebRequest -UseBasicParsing -Method Post -Uri "$base/api/expenses" -ContentType 'application/json' -Body '{}'
+} catch {
+    [int]$_.Exception.Response.StatusCode
+    $_.ErrorDetails.Message
+}
+```
+
+Captured result: HTTP 400
+
+```json
+{"error":"Enter a description, category, positive amount (up to two decimals), and valid date."}
+```
+
+Remote readers must replace $base with the currently verified public base URL,
+without /api at the end. localhost refers to the reader's own computer.
+Temporary tunnels expire or change: verify the public /api/health before sharing.
+Keep the laptop awake and MySQL, API and tunnel running.
+
+Protected provider routes still require bearer tokens. Those checks are deferred
+in this pass; existing authenticated examples below are retained as reference.
+
 ## Clean-clone quickstart (Windows PowerShell)
 
 ### 1. Prerequisites
@@ -316,3 +375,66 @@ Author self-verification is recorded in docs/VERIFICATION.md. A real external
 team's blind test has not yet been performed; see BLIND_TEST_REPORT.md. Self-tests
 are not a substitute for the handout's external-team exercise. No site has been
 published and no Week 8 changes have been pushed by this work.
+
+
+## Week 9: HandyNear API key and demo records
+
+HandyNear is our only external consumer. Run `node setup-api-key.js --demo` from
+`server` once for the demo, or `node setup-api-key.js` for the normal `.env`.
+Existing keys are preserved. Keys are saved only in that ignored configuration file. Share only
+`HANDYNEAR_API_KEY` privately with HandyNear; use `MONEYMENTOR_TEST_API_KEY`
+for your own tests. `API_KEYS` is the server allowlist containing both keys;
+never send the entire allowlist as a request header or share it with a consumer.
+Never commit it, put it in a URL, or embed it in React/browser code.
+Restart the API after changing configuration (`npm.cmd run start:demo`).
+
+All data endpoints require `X-API-Key`. Provider endpoints additionally require
+`Authorization: Bearer <token>`; `node demo-token.js 1` generates provider 1's
+one-hour token. The key itself remains valid until replaced in the configuration
+and the server restarted. Replacing it revokes the old key.
+
+PowerShell example (replace placeholders privately):
+
+```powershell
+$base = 'http://127.0.0.1:5001'
+$headers = @{ 'X-API-Key' = '<private HandyNear key>'; Authorization = 'Bearer <provider 1 token>' }
+Invoke-RestMethod -Uri "$base/api/handymen/1/savings-goals" -Headers $headers
+Invoke-RestMethod -Uri "$base/api/handymen/1/investment-projections" -Headers $headers
+Invoke-RestMethod -Uri "$base/api/handymen/1/income-summaries?month=2026-10" -Headers $headers
+```
+
+Missing/wrong API key: HTTP 401, `{"error":"Missing or invalid API key"}`.
+More than 100 authenticated requests per key in a 60-second window: HTTP 429,
+`{"error":"Rate limit exceeded. Try again later."}` with `Retry-After` in seconds.
+`GET /api/health` is public because it exposes no business records or credentials.
+The limiter is in memory: restarting resets it, and multiple instances would need
+a shared store. Production configuration stays at 100; automated tests use 3.
+
+Run `node seed-week9-demo.js` to top up the isolated demo data without replacing
+existing records. There are at least 10 expenses, budgets, savings goals and
+contact questions, and at least 10 provider-1 expenses, savings goals,
+investments and income records. Income covers January–October 2026.
+Income summaries return one calculated object per month. POST/PATCH/DELETE are
+operations over these records, not lists of ten results. Questions remain
+write-only: there is deliberately no public contact-details listing.
+Partner reward records belong to our producer and are not fabricated locally.
+
+The older React client does not yet send API keys; its data requests will receive
+401 under this security policy. Use the command-line examples above for this lab.
+Do not fix this by embedding the private key in frontend source. A production
+browser client needs a backend session/proxy design.
+
+Our producer's key, when supplied privately, goes in `PARTNER_API_KEY` on the
+server; the partner client forwards it as `X-API-Key`. It is distinct from the
+key HandyNear uses to call us.
+
+
+## Local web access for Week 10
+
+Run the production frontend build (`npm.cmd run build` at the repository root),
+then run `npm.cmd run start:web` from server. Open http://localhost:3000 and click
+Load rewards. This loopback-only web gateway keeps both keys on the server and
+starts a separate protected API instance. It forwards only the rewards route.
+Do not tunnel port 3000; remote user sessions are outside this local demo.
+See WEEK10_RUN.md for current startup and failure/recovery instructions, which
+supersede the earlier browser-blocked notes for the rewards panel only.

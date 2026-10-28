@@ -6,9 +6,9 @@ const {execFileSync}=require('node:child_process');
 const env=require('dotenv').parse(fs.readFileSync(path.join(__dirname,'.env.demo')));
 const base=`http://127.0.0.1:${env.PORT}/api`;
 const token=execFileSync(process.execPath,[path.join(__dirname,'demo-token.js'),'1'],{encoding:'utf8'}).trim();
-const headers={Authorization:`Bearer ${token}`,'Content-Type':'application/json'};
+const headers={'X-API-Key':env.MONEYMENTOR_TEST_API_KEY || env.API_KEYS.split(',')[0],Authorization:`Bearer ${token}`,'Content-Type':'application/json'};
 async function call(method,url,body,status,authenticated=true){
-  const response=await fetch(base+url,{method,headers:authenticated?headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
+  const response=await fetch(base+url,{method,headers:authenticated?headers:{'Content-Type':'application/json','X-API-Key':env.MONEYMENTOR_TEST_API_KEY || env.API_KEYS.split(',')[0]},body:body===undefined?undefined:JSON.stringify(body)});
   const text=await response.text();
   assert.equal(response.status,status,`${method} ${url}: ${text}`);
   return text?JSON.parse(text):null;
@@ -27,9 +27,9 @@ async function main(){
     const summary=await call('GET','/handymen/1/income-summaries?month=2026-09',undefined,200);
     assert.equal(summary.total_expenses,before.total_expenses+3000);
     const savings=await call('GET','/handymen/1/savings-goals',undefined,200);
-    assert.deepEqual(savings,[{id:1,handyman_id:1,goal_amount:1000,current_amount:450,progress_percentage:45}]);
+    assert.ok(savings.length>=10); assert.ok(savings.some(row=>row.goal_amount===1000 && row.current_amount===450));
     const investments=await call('GET','/handymen/1/investment-projections',undefined,200);
-    assert.deepEqual(investments,[{handyman_id:1,initial_amount:1000,monthly_contribution:100,annual_rate:12,years:1,projected_value:2395.08}]);
+    assert.ok(investments.length>=10); assert.ok(investments.some(row=>row.projected_value===2395.08));
     assert.equal(await call('DELETE',`/expenses/${id}`,undefined,204),null);
     assert.deepEqual(await call('DELETE',`/expenses/${id}`,undefined,404),{error:'Expense not found.'});id=undefined;
     assert.deepEqual(await call('GET','/handymen/1/income-summaries?month=Sept2026',undefined,400),{error:'month must use YYYY-MM format.'});

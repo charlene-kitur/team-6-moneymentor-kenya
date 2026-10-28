@@ -1,4 +1,4 @@
-const request=require('supertest');
+const request=require('../test-support/request');
 const jwt=require('jsonwebtoken');
 const {setupProvider}=require('../test-support/provider');
 const s=setupProvider();

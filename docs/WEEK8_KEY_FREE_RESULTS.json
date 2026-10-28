@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-26",
+  "kind": "author self-check; not an independent blind test",
+  "base": "http://127.0.0.1:5001",
+  "operations": [
+    "GET /handymen/{handymanId}/income-summaries",
+    "POST /handymen/{handymanId}/expenses",
+    "PATCH /expenses/{expenseId}",
+    "DELETE /expenses/{expenseId}",
+    "GET /handymen/{handymanId}/savings-goals",
+    "GET /handymen/{handymanId}/investment-projections"
+  ],
+  "results": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "response": {
+        "status": "ok",
+        "database": "connected"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/expenses",
+      "status": 200,
+      "response": [
+        {
+          "id": 33,
+          "description": "Sample: mobile data for client calls",
+          "category": "Utilities",
+          "amount": 1000,
+          "expense_date": "2026-10-26"
+        },
+        {
+          "id": 32,
+          "description": "Sample: replacement hand tools",
+          "category": "Other",
+          "amount": 3750,
+          "expense_date": "2026-10-26"
+        },
+        {
+          "id": 31,
+          "description": "Sample: workspace rent",
+          "category": "Housing",
+          "amount": 12000,
+          "expense_date": "2026-10-25"
+        },
+        {
+          "id": 30,
+          "description": "Sample: first aid supplies",
+          "category": "Health",
+          "amount": 1200,
+          "expense_date": "2026-10-24"
+        },
+        {
+          "id": 29,
+          "description": "Sample: skills training course",
+          "category": "Education",
+          "amount": 5000,
+          "expense_date": "2026-10-23"
+        },
+        {
+          "id": 28,
+          "description": "Sample: lunch during site work",
+          "category": "Food",
+          "amount": 450,
+          "expense_date": "2026-10-22"
+        },
+        {
+          "id": 25,
+          "description": "Sample: transport to a client",
+          "category": "Transport",
+          "amount": 500,
+          "expense_date": "2026-10-22"
+        },
+        {
+          "id": 27,
+          "description": "Sample: workshop electricity",
+          "category": "Utilities",
+          "amount": 2400,
+          "expense_date": "2026-10-21"
+        },
+        {
+          "id": 26,
+          "description": "Sample: client visit transport",
+          "category": "Transport",
+          "amount": 650,
+          "expense_date": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/expenses",
+      "status": 400,
+      "response": {
+        "error": "Enter a description, category, positive amount (up to two decimals), and valid date."
+      }
+    }
+  ]
+}

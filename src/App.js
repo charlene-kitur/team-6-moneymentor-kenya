@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ExpenseTracker from './ExpenseTracker';
+import PartnerRewards from './PartnerRewards';
 
 function App() {
   // ===== STATE =====
@@ -556,6 +557,7 @@ function App() {
 
  {/* ======== EXPENSE TRACKER ======== */}
       <ExpenseTracker />
+      <PartnerRewards />
 
       {/* ======== CONTACT / ASK AN EXPERT ======== */}
       <section id="contact">
