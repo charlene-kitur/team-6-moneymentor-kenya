@@ -40,3 +40,4 @@ Please specify the 201 fields, required fields, types and example (including
 whether refundedAt is always present), whether amountCents must be positive,
 and the exact 400/404/409 response bodies. This is necessary to avoid interpreting
 a rejected refund as a completed financial action.
+For GET /claims/{claimId}/refunds, should refundedAt also be required for every refund event? It is currently missing from the response object's required list.
