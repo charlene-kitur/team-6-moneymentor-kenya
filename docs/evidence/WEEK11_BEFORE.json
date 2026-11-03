@@ -1,0 +1,163 @@
+{
+  "testedAt": "2026-11-03T08:30:07.631Z",
+  "controlledPartner": true,
+  "results": [
+    {
+      "scenario": "normal direct partner",
+      "ms": 197
+    },
+    {
+      "scenario": "ok",
+      "status": 200,
+      "ms": 14,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ]
+      },
+      "logs": []
+    },
+    {
+      "scenario": "slow",
+      "status": 502,
+      "ms": 10056,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner call failed: 23"
+      ]
+    },
+    {
+      "scenario": "flaky",
+      "status": 502,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner returned 503"
+      ]
+    },
+    {
+      "scenario": "error",
+      "status": 502,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner returned 500"
+      ]
+    },
+    {
+      "scenario": "bad",
+      "status": 502,
+      "ms": 4,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner call failed: PARTNER_SHAPE_MISMATCH"
+      ]
+    },
+    {
+      "scenario": "denied",
+      "status": 502,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner returned 401"
+      ]
+    },
+    {
+      "scenario": "limited",
+      "status": 502,
+      "ms": 4,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner returned 429"
+      ]
+    },
+    {
+      "scenario": "recovery",
+      "status": 200,
+      "ms": 4,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ]
+      },
+      "logs": []
+    },
+    {
+      "scenario": "slow after restart, empty cache",
+      "status": 502,
+      "ms": 10018,
+      "calls": 1,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner call failed: 23"
+      ]
+    },
+    {
+      "scenario": "prime cache before stop",
+      "status": 200,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ]
+      },
+      "logs": []
+    },
+    {
+      "scenario": "stopped",
+      "status": 502,
+      "ms": 7,
+      "calls": null,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner call failed: ECONNREFUSED"
+      ]
+    }
+  ]
+}

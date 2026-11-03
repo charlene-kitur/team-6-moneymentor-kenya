@@ -20,7 +20,9 @@ export default function PartnerRewards() {
   <p>View reward values reported by Prestige. These are not confirmed wallet payments.</p>
   <button type="button" onClick={load} disabled={loading}>{loading?'Loading rewards…':'Load rewards'}</button>
   {error&&<p role="alert">{error}</p>}
-  {data&&<><p>{data.source}</p>{data.claims.length===0?<p>No claimed-item rewards found.</p>:<table>
+  {data&&<><p>{data.source}</p>
+   {data.stale&&<p role="status" style={{background:'#fff3cd',padding:'12px'}}>Showing saved data from {new Date(data.asOf).toLocaleString()}. The partner is not responding with usable data. These rewards may be out of date.</p>}
+   {data.claims.length===0?<p>No claimed-item rewards found.</p>:<table>
    <thead><tr><th>Claim</th><th>Student</th><th>Item</th><th>Reward (cents)</th><th>Reward (whole units)</th></tr></thead>
    <tbody>{data.claims.map(r=><tr key={r.claimId}><td>{r.claimId}</td><td>{r.studentId}</td><td>{r.itemId}</td><td>{r.rewardAmountCents}</td><td>{(r.rewardAmountCents/100).toFixed(2)}</td></tr>)}</tbody>
   </table>}</>}

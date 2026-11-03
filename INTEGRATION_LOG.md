@@ -122,3 +122,15 @@ part of this feature and is not claimed fixed.
 No commit or push. The old pending-browser statements above are historical and
 are superseded by these observed results. Partner contact/TA check-in and new
 HandyNear authentication retest are not established by this browser test.
+
+## Replacement tunnel check — 28 October 2026
+
+Updated the private producer base URL to
+https://specially-specified-topic-org.trycloudflare.com and restarted the local
+web service. An authenticated GET /claims?status=claimed returned HTTP 530 with
+a Cloudflare Tunnel error page (error 1033), not the producer's JSON response.
+Recovery is not confirmed. Prestige must restore its tunnel/API and confirm the
+current URL. Existing producer key retained; no key included in this log.
+
+## 3 November 2026 - Week 11 resilience
+Controlled before/after HTTP checks are in docs/evidence/WEEK11_BEFORE.json and WEEK11_AFTER.json. Added bounded GET retries, 1.5 s attempt timeout, validated in-memory fallback and dated UI banner. Slow fallback measured 5.139 s; flaky succeeded on attempt three. 401/schema errors were not retried. See RESILIENCE_NOTES.md; real Prestige stop/restart drill remains pending. Existing real partner settings and consumer tunnel were not changed.

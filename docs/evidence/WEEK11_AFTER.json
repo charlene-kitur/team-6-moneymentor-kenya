@@ -1,0 +1,255 @@
+{
+  "testedAt": "2026-11-03T08:30:58.529Z",
+  "controlledPartner": true,
+  "results": [
+    {
+      "scenario": "normal direct partner",
+      "ms": 132
+    },
+    {
+      "scenario": "ok",
+      "status": 200,
+      "ms": 14,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:44.084Z",
+        "stale": false
+      },
+      "logs": []
+    },
+    {
+      "scenario": "slow",
+      "status": 200,
+      "ms": 5139,
+      "calls": 3,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:44.084Z",
+        "stale": true
+      },
+      "logs": [
+        "Partner attempt 1 failed (timeout); retrying in 200 ms",
+        "Partner attempt 2 failed (timeout); retrying in 400 ms",
+        "Partner call failed: timeout"
+      ]
+    },
+    {
+      "scenario": "flaky",
+      "status": 200,
+      "ms": 1266,
+      "calls": 3,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:50.512Z",
+        "stale": false
+      },
+      "logs": [
+        "Partner attempt 1 failed (HTTP 503); retrying in 200 ms",
+        "Partner attempt 2 failed (HTTP 503); retrying in 400 ms"
+      ]
+    },
+    {
+      "scenario": "error",
+      "status": 200,
+      "ms": 1002,
+      "calls": 3,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:50.512Z",
+        "stale": true
+      },
+      "logs": [
+        "Partner attempt 1 failed (HTTP 500); retrying in 200 ms",
+        "Partner attempt 2 failed (HTTP 500); retrying in 400 ms",
+        "Partner call failed: HTTP 500"
+      ]
+    },
+    {
+      "scenario": "bad",
+      "status": 200,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:50.512Z",
+        "stale": true
+      },
+      "logs": [
+        "Partner call failed: invalid response schema"
+      ]
+    },
+    {
+      "scenario": "denied",
+      "status": 200,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:50.512Z",
+        "stale": true
+      },
+      "logs": [
+        "Partner call failed: HTTP 401"
+      ]
+    },
+    {
+      "scenario": "limited",
+      "status": 200,
+      "ms": 1119,
+      "calls": 2,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:52.664Z",
+        "stale": false
+      },
+      "logs": [
+        "Partner attempt 1 failed (HTTP 429); retrying in 1000 ms"
+      ]
+    },
+    {
+      "scenario": "recovery",
+      "status": 200,
+      "ms": 4,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:52.672Z",
+        "stale": false
+      },
+      "logs": []
+    },
+    {
+      "scenario": "slow after restart, empty cache",
+      "status": 502,
+      "ms": 5143,
+      "calls": 3,
+      "body": {
+        "message": "Partner data is unavailable right now. Please try again later."
+      },
+      "logs": [
+        "Partner attempt 1 failed (timeout); retrying in 200 ms",
+        "Partner attempt 2 failed (timeout); retrying in 400 ms",
+        "Partner call failed: timeout"
+      ]
+    },
+    {
+      "scenario": "prime cache before stop",
+      "status": 200,
+      "ms": 5,
+      "calls": 1,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:57.887Z",
+        "stale": false
+      },
+      "logs": []
+    },
+    {
+      "scenario": "stopped",
+      "status": 200,
+      "ms": 636,
+      "calls": null,
+      "body": {
+        "source": "Partner API",
+        "claims": [
+          {
+            "claimId": "lab-1",
+            "studentId": "sample-student",
+            "itemId": "sample-item",
+            "status": "claimed",
+            "rewardAmountCents": 15000
+          }
+        ],
+        "asOf": "2026-11-03T08:30:57.887Z",
+        "stale": true
+      },
+      "logs": [
+        "Partner attempt 1 failed (connection failure); retrying in 200 ms",
+        "Partner attempt 2 failed (connection failure); retrying in 400 ms",
+        "Partner call failed: connection refused"
+      ]
+    }
+  ]
+}
