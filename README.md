@@ -438,3 +438,21 @@ starts a separate protected API instance. It forwards only the rewards route.
 Do not tunnel port 3000; remote user sessions are outside this local demo.
 See WEEK10_RUN.md for current startup and failure/recovery instructions, which
 supersede the earlier browser-blocked notes for the rewards panel only.
+
+## Request monitoring
+
+Use `GET /stats` on the MoneyMentor API (demo port 5001). Send your issued API key in the header. In PowerShell:
+
+```powershell
+curl.exe -s -H "X-API-Key: <your-api-key>" "http://127.0.0.1:5001/stats"
+```
+
+Example response after one health check:
+
+```json
+{"startedAt":"2026-11-03T12:00:00.000Z","uptimeSeconds":4,"total":1,"clientErrors":0,"serverErrors":0,"errorRatePercent":0,"avgMs":4.2,"routes":{"GET /api/health":{"count":1,"clientErrors":0,"serverErrors":0,"avgMs":4.2,"maxMs":4.2}}}
+```
+
+Counters cover finished requests on this server process and reset on restart. A stats request first appears in the following snapshot. Error rate counts 5xx responses only. Requests rejected before routing share the `(no route)` bucket. Each request log includes its status and caller fingerprint.
+
+For the Week 12 exercise, from the server folder run `node demo-start.js 2>&1 | Tee-Object -FilePath requests.log`. In another terminal set `API` to the target base URL, `KEY` to your issued key and optionally `N` to the number of requests. Run `node traffic.js`. The script reads expenses, budgets and savings goals and intentionally includes rejected and missing routes.

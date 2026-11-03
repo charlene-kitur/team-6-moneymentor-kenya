@@ -1,13 +1,4 @@
-const crypto = require('crypto');
-
 const round = (n) => Math.round(n * 10) / 10;
-
-// A label for who called, without ever writing the key itself.
-function who(req) {
-  if (!req.apiKey) return 'none';
-  const hash = crypto.createHash('sha256').update(req.apiKey).digest('hex');
-  return 'key-' + hash.slice(0, 6);
-}
 
 const stats = {
   startedAt: new Date().toISOString(),
@@ -24,6 +15,7 @@ function newRoute() {
 
 function monitor(req, res, next) {
   const start = process.hrtime.bigint();
+  const path = req.path;
 
   res.on('finish', () => {
     const ms = Number(process.hrtime.bigint() - start) / 1e6;
@@ -32,10 +24,10 @@ function monitor(req, res, next) {
     console.log(JSON.stringify({
       time: new Date().toISOString(),
       method: req.method,
-      path: req.path, // path only, no query string
+      path, // captured before Express strips mounted prefixes
       status: res.statusCode,
       ms: round(ms),
-      caller: who(req),
+      caller: req.callerLabel || 'none',
     }));
 
     // 2. Update running totals

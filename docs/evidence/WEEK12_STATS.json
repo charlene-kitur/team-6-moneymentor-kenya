@@ -1,0 +1,53 @@
+{
+  "startedAt": "2026-11-03T17:37:22.541Z",
+  "uptimeSeconds": 124,
+  "total": 266,
+  "clientErrors": 119,
+  "serverErrors": 1,
+  "errorRatePercent": 0.4,
+  "avgMs": 2,
+  "routes": {
+    "GET /api/health": {
+      "count": 1,
+      "clientErrors": 0,
+      "serverErrors": 1,
+      "avgMs": 14.2,
+      "maxMs": 14.2
+    },
+    "GET (no route)": {
+      "count": 118,
+      "clientErrors": 118,
+      "serverErrors": 0,
+      "avgMs": 0.7,
+      "maxMs": 1.8
+    },
+    "GET /api/expenses": {
+      "count": 77,
+      "clientErrors": 0,
+      "serverErrors": 0,
+      "avgMs": 4.1,
+      "maxMs": 177.7
+    },
+    "POST /api/expenses": {
+      "count": 1,
+      "clientErrors": 1,
+      "serverErrors": 0,
+      "avgMs": 5,
+      "maxMs": 5
+    },
+    "GET /api/budgets": {
+      "count": 30,
+      "clientErrors": 0,
+      "serverErrors": 0,
+      "avgMs": 2,
+      "maxMs": 9.1
+    },
+    "GET /api/savings-goals": {
+      "count": 39,
+      "clientErrors": 0,
+      "serverErrors": 0,
+      "avgMs": 1.8,
+      "maxMs": 6.3
+    }
+  }
+}

@@ -10,6 +10,7 @@ function apiSecurity(options = {}) {
   const key=req.get('X-API-Key') || '';
   const id=crypto.createHash('sha256').update(key).digest('hex');
   if(!allowed.has(id)) return res.status(401).json({error:'Missing or invalid API key'});
+  req.callerLabel = 'key-' + id.slice(0, 6);
   const now=Date.now(); let bucket=buckets.get(id);
   if(!bucket || now>=bucket.until){bucket={count:0,until:now+60000};buckets.set(id,bucket);}
   if(bucket.count>=max){res.set('Retry-After',String(Math.ceil((bucket.until-now)/1000)));return res.status(429).json({error:'Rate limit exceeded. Try again later.'});}
