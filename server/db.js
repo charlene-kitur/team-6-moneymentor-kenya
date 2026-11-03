@@ -1,6 +1,6 @@
 require('dotenv').config({
   path: require('node:path').join(__dirname, '.env'),
-  override: true,
+  override: false,
 });
 const mysql = require('mysql2/promise');
 module.exports = mysql.createPool({
@@ -14,3 +14,4 @@ module.exports = mysql.createPool({
   dateStrings: true,
   decimalNumbers: true
 });
+
