@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { monitor, statsHandler } = require('./monitoring');
 const categories = ['Housing', 'Food', 'Transport', 'Utilities', 'Education', 'Health', 'Other'];
 function validExpense(body) {
   if (!body || typeof body.description !== 'string' || !body.description.trim() || body.description.trim().length > 200) return false;
@@ -10,9 +11,13 @@ function validExpense(body) {
 }
 function createApp(db, options = {}) {
   const app = express();
+  // Monitor before middleware so authentication and parsing failures are counted.
+  app.use(monitor);
   app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
   app.use(require('./api-security').apiSecurity(options));
   app.use(express.json({ limit: '16kb' }));
+  // Statistics require a valid API key, like other protected routes.
+  app.get('/stats', statsHandler);
   app.get('/', (req, res) => res.json({ message: 'MoneyMentor API is running' }));
   app.get('/api/health', async (req, res, next) => {
     try { await db.query('SELECT 1'); res.json({ status: 'ok', database: 'connected' }); } catch (error) { next(error); }
