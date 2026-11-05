@@ -27,6 +27,7 @@ function mountProviderApi(app, db, options = {}) {
     try {
       if (!match) throw new Error('Missing token');
       const claims = jwt.verify(match[1], secret, {algorithms:['HS256'], issuer, audience});
+      if (claims.role && claims.role !== 'handyman') throw new Error('Invalid role');
       if (typeof claims.sub !== 'string' || !validId(claims.sub) || !Number.isFinite(claims.exp)) throw new Error('Invalid claims');
       req.handymanId = Number(claims.sub);
       next();
@@ -82,22 +83,6 @@ function mountProviderApi(app, db, options = {}) {
       const [result] = await db.execute('DELETE FROM provider_expenses WHERE id=? AND handyman_id=?',[req.params.expenseId,req.handymanId]);
       if (!result.affectedRows) return res.status(404).json({error:'Expense not found.'});
       res.status(204).send();
-    } catch(error) { next(error); }
-  });
-  app.get('/api/handymen/:handymanId/savings-goals', auth, owner, async (req,res,next) => {
-    try {
-      const [rows] = await db.execute('SELECT id,handyman_id,goal_amount,current_amount FROM provider_savings_goals WHERE handyman_id=? ORDER BY id',[req.handymanId]);
-      res.json(rows.map(row=>({...row,progress_percentage:Number((row.current_amount/row.goal_amount*100).toFixed(2))})));
-    } catch(error) { next(error); }
-  });
-  app.get('/api/handymen/:handymanId/investment-projections', auth, owner, async (req,res,next) => {
-    try {
-      const [rows] = await db.execute('SELECT handyman_id,initial_amount,monthly_contribution,annual_rate,years FROM provider_investments WHERE handyman_id=? ORDER BY id',[req.handymanId]);
-      res.json(rows.map(row=>{
-        const r=row.annual_rate/1200,n=row.years*12;
-        const value=r===0 ? row.initial_amount+row.monthly_contribution*n : row.initial_amount*(1+r)**n+row.monthly_contribution*((1+r)**n-1)/r;
-        return {...row,projected_value:Number(value.toFixed(2))};
-      }));
     } catch(error) { next(error); }
   });
 }

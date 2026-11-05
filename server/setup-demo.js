@@ -21,7 +21,7 @@ async function main() {
     if (exists.length) throw new Error('moneymentor_week8_demo already exists. Refusing to overwrite it. See README troubleshooting.');
     await connection.query('CREATE DATABASE '+mysql.escapeId(database));
     await connection.query('USE '+mysql.escapeId(database));
-    for (const file of ['schema.sql','provider-schema.sql']) {
+    for (const file of ['schema.sql','provider-schema.sql','wallet-schema.sql']) {
       for (const statement of fs.readFileSync(path.join(__dirname,file),'utf8').split(';').filter(s=>s.trim())) await connection.query(statement);
     }
     await connection.execute('INSERT INTO handymen (id,name) VALUES (1,?)',['Documentation demo provider']);

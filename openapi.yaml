@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
   title: MoneyMentor Kenya API
-  version: 1.0.0
+  version: 2.0.0
   description: >-
-    API that allows HandyNear providers to access income summaries, manage expenses, monitor savings goals,
-    and view investment projections.
-     Contract routes use provider-owned data. Local tracker extensions use separate tables and cannot access provider records.
+    HandyNear provider income and expenses plus simulated customer wallets in KES. API key and
+    role-appropriate bearer token required. Savings and investment provider routes retired. Routes retain /api
+    prefix.
 servers:
   - url: http://localhost:5001/api
     description: Isolated README demo (npm run start:demo)
@@ -330,148 +330,6 @@ paths:
       security:
         - apiKeyAuth: []
           bearerAuth: []
-  /handymen/{handymanId}/savings-goals:
-    get:
-      summary: Get a handyman's savings-goal progress
-      operationId: getSavingsGoalProgress
-      tags:
-        - Savings
-      parameters:
-        - $ref: '#/components/parameters/HandymanId'
-      responses:
-        '200':
-          description: Savings-goal progress returned successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SavingsGoal'
-              example:
-                - id: 1
-                  handyman_id: 1
-                  goal_amount: 1000
-                  current_amount: 450
-                  progress_percentage: 45
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Missing or invalid API key
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          description: More than 100 requests per key per minute. Retry after the indicated delay.
-          headers:
-            Retry-After:
-              schema:
-                type: integer
-              description: Seconds until the limit resets
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Rate limit exceeded. Try again later.
-        '500':
-          description: Database operation denied by its permissions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Database permissions are not configured for this operation.
-        '503':
-          description: Database or authentication configuration unavailable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Database unavailable. Check that MySQL is running and the database has been set up.
-      description: >-
-        Stored provider goals. Progress = current_amount / goal_amount * 100, rounded to two decimals;
-        overfunding can exceed 100%. No goals returns [].
-      security:
-        - apiKeyAuth: []
-          bearerAuth: []
-  /handymen/{handymanId}/investment-projections:
-    get:
-      summary: Get investment growth projections
-      operationId: getInvestmentProjections
-      tags:
-        - Investments
-      parameters:
-        - $ref: '#/components/parameters/HandymanId'
-      responses:
-        '200':
-          description: Investment projections returned successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InvestmentProjection'
-              example:
-                - handyman_id: 1
-                  initial_amount: 1000
-                  monthly_contribution: 100
-                  annual_rate: 12
-                  years: 1
-                  projected_value: 2395.08
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Missing or invalid X-API-Key, or missing/invalid bearer token.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Missing or invalid API key
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          description: More than 100 requests per key per minute. Retry after the indicated delay.
-          headers:
-            Retry-After:
-              schema:
-                type: integer
-              description: Seconds until the limit resets
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Rate limit exceeded. Try again later.
-        '500':
-          description: Database operation denied by its permissions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Database permissions are not configured for this operation.
-        '503':
-          description: Database or authentication configuration unavailable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Database unavailable. Check that MySQL is running and the database has been set up.
-      description: >-
-        Stored inputs: annual_rate is a percentage from 0 to 100; years is 0 to 100. Monthly compounding with
-        contributions at month end; final value rounded to two decimals. At zero rate: initial_amount +
-        monthly_contribution * 12 * years. No investments returns [].
-      security:
-        - apiKeyAuth: []
-          bearerAuth: []
   /health:
     get:
       summary: Public connectivity check
@@ -504,6 +362,403 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: Database unavailable. Check that MySQL is running and the database has been set up.
+  /customers/{customerId}/wallet:
+    get:
+      summary: Read own simulated wallet balance
+      operationId: getCustomerWallet
+      tags:
+        - Wallet
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      responses:
+        '200':
+          description: Balance in whole KES cents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        '400':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '429':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '503':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /customers/{customerId}/wallet/topups:
+    post:
+      summary: Add simulated credit to own wallet
+      operationId: topupCustomerWallet
+      tags:
+        - Wallet
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: >-
+            Reuse the same key for retries of one operation. A different request with the same customer/key
+            returns 409.
+          schema:
+            type: string
+            pattern: ^[A-Za-z0-9_-]{1,100}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - amount_cents
+              properties:
+                amount_cents:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000000
+            example:
+              amount_cents: 100000
+      responses:
+        '201':
+          description: >-
+            Created or replay of original successful request. Balance is the historical balance immediately
+            after this transaction.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransaction'
+        '400':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '429':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '503':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /bookings/{bookingId}/pay:
+    post:
+      summary: Pay a trusted registered booking from the authenticated customer wallet
+      operationId: payBooking
+      tags:
+        - Wallet
+      description: >-
+        Empty body only. Booking price, customer and handyman are registered by the trusted administrator.
+        Successful payment also records provider income. Original idempotency key replays 201. A paid booking
+        with a new key returns 409. Refunds require a future contract change.
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: >-
+            Reuse the same key for retries of one operation. A different request with the same customer/key
+            returns 409.
+          schema:
+            type: string
+            pattern: ^[A-Za-z0-9_-]{1,100}$
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '201':
+          description: Simulated payment committed or replayed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransaction'
+        '400':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '429':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '503':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /customers/{customerId}/wallet/transactions:
+    get:
+      summary: Read own wallet transaction history, newest first
+      operationId: getWalletTransactions
+      tags:
+        - Wallet
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      responses:
+        '200':
+          description: History.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WalletTransaction'
+        '400':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '429':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '503':
+          description: >-
+            Invalid input, missing credentials, ownership/not found, conflict, rate limit, or service failure
+            as applicable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
   securitySchemes:
     bearerAuth:
@@ -699,6 +954,66 @@ components:
           description: Valid calendar date, YYYY-MM-DD, year 1000 or later.
       additionalProperties: false
       minProperties: 1
+    Wallet:
+      type: object
+      required:
+        - customer_id
+        - balance_cents
+        - currency
+        - simulated
+      properties:
+        customer_id:
+          type: integer
+        balance_cents:
+          type: integer
+          minimum: 0
+        currency:
+          type: string
+          enum:
+            - KES
+        simulated:
+          type: boolean
+          enum:
+            - true
+    WalletTransaction:
+      type: object
+      required:
+        - id
+        - customer_id
+        - type
+        - amount_cents
+        - balance_after_cents
+        - booking_id
+        - currency
+        - simulated
+      properties:
+        id:
+          type: integer
+        customer_id:
+          type: integer
+        type:
+          type: string
+          enum:
+            - topup
+            - payment
+        amount_cents:
+          type: integer
+        balance_after_cents:
+          type: integer
+        booking_id:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          enum:
+            - KES
+        simulated:
+          type: boolean
+          enum:
+            - true
+        created_at:
+          type: string
+          description: Present in transaction history, database timestamp.
   responses:
     BadRequest:
       description: Invalid request data

@@ -178,6 +178,7 @@ function createApp(db, options = {}) {
   });
   require('./partner-api').mountPartnerApi(app, options);
   require('./provider-api').mountProviderApi(app, db, options);
+  require('./wallet-api').mountWalletApi(app, db, options);
   app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });

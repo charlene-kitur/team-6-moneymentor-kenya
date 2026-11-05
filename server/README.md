@@ -1,7 +1,7 @@
 ## Week 8 quickstart and offline reference
 
 For a clean clone, use the [root README](../README.md). It includes the isolated
-demo setup, token commands and all six request/response examples. Open
+demo setup, token commands and the current request/response examples. Open
 [docs/index.html](../docs/index.html) directly in a browser for the offline API
 reference. `npm.cmd run docs:build` regenerates it; with the demo API running,
 `npm.cmd run docs:verify` checks the examples. The older setup notes below apply
@@ -44,15 +44,7 @@ and avoid simultaneous manual writes while running tests.
 5. Restore runtime credentials before starting the API or running tests.
 
 ## Provider contract and data
-openapi.yaml at the repository root is the provider contract. All its routes
-require a verified HS256 bearer JWT with subject = handyman ID, expiration,
-issuer moneymentor-local and audience moneymentor-api (configurable via .env).
-Missing/invalid/expired tokens return 401; nonexistent or other-provider records
-return 404. No public token issuance or registration endpoint is exposed.
-
-Provider tables: handymen, provider_income, provider_expenses,
-provider_savings_goals, provider_investments. They are separate from local
-tracker data; old local rows are not assigned to an arbitrary provider.
+openapi.yaml is the current consumer contract. See ../WALLET_INTEGRATION.md for simulated wallets, trusted booking registration, customer JWTs and idempotency. Provider income/expense routes use a handyman subject. Wallet routes require a customer subject and role=customer. All consumer routes require an API key.
 
 For manual local development, an administrator can create a provider and issue
 an expiring token using the CLI:
@@ -67,13 +59,7 @@ use Authorization: Bearer TOKEN in Postman/Swagger. This is local provisioning,
 not a production login or an integration with a live HandyNear identity service.
 
 GET income summaries sum provider_income and provider_expenses by month.
-Savings progress uses stored goal/current amounts and may exceed 100%.
-Investment projections compound monthly with contributions at month end;
-zero rate and zero years are supported. Money results are rounded to two decimals.
-No provider income/goal/investment write routes were added: those are not in the
-contract. Populate them through trusted data import/admin SQL; tests create and
-roll back explicit fixtures. An existing provider without those rows returns
-zero income totals or empty lists, never invented financial data.
+Provider savings and investment routes are retired. Booking payments add simulated provider income atomically with wallet deductions. Existing historical tables are retained.
 
 ## Local React compatibility
 The unauthenticated local tracker uses separate tables:

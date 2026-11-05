@@ -1,7 +1,11 @@
+# HandyNear wallet migration
+
+The current consumer contract is 2.0.0. Read [WALLET_INTEGRATION.md](WALLET_INTEGRATION.md) for customer tokens, cents, idempotency, booking registration and examples. Provider savings and investment GET routes now return 404. Income and expense routes remain available.
+
 # MoneyMentor Kenya API
 
 MoneyMentor Kenya gives HandyNear providers monthly income summaries, expense
-management, savings-goal progress and investment projections. The six provider
+management and simulated customer wallets. The four provider
 endpoints use JWT authentication and provider ownership checks. This repository
 also contains a separate, local React expense tracker. Follow the API quickstart
 below first; the React app is not required to call or test the API.
@@ -23,7 +27,7 @@ download the file and open it in a browser to view the rendered page.
 ## Week 8 key-free quickstart - 26 October 2026
 
 Week 9 supersedes the key-free instructions below: all data requests now require X-API-Key. Provider routes also require the existing bearer token.
-These API-key-protected local-app endpoints supplement the six protected provider operations;
+These API-key-protected local-app endpoints supplement the four protected provider operations;
 they do not replace them. For a clean clone, follow setup steps 1-4 below first.
 For an existing demo, keep MySQL and npm.cmd run start:demo running.
 
@@ -191,7 +195,7 @@ token issuance is an administrator-only local lab CLI. This is not a live
 HandyNear identity integration. In Swagger or other clients send the token in
 `Authorization: Bearer TOKEN`, never in the URL.
 
-## Six endpoint examples
+## Provider endpoint examples
 
 Run in order in the second terminal, retaining `$base`, `$headers` and `$created`.
 Examples are captured from a fresh demo; automatically generated IDs may differ
@@ -240,39 +244,6 @@ HTTP **200**:
 Only supplied fields change. At least one supported field is required. Sending
 this same update twice leaves the same state. Re-fetch the income summary to
 see total_expenses 3000 and net_income 2000 before deletion.
-
-### 4. GET savings-goal progress
-
-<!-- example:savings -->
-```powershell
-(Invoke-WebRequest -UseBasicParsing -Uri "$base/handymen/1/savings-goals" -Headers $headers).Content
-```
-
-HTTP **200**, raw JSON response:
-
-```json
-[{"id":1,"handyman_id":1,"goal_amount":1000,"current_amount":450,"progress_percentage":45}]
-```
-
-The raw HTTP response is an array. No goals returns `[]`. Progress is current_amount divided
-by goal_amount times 100, rounded to two decimals; it can exceed 100%.
-
-### 5. GET investment projections
-
-<!-- example:investments -->
-```powershell
-(Invoke-WebRequest -UseBasicParsing -Uri "$base/handymen/1/investment-projections" -Headers $headers).Content
-```
-
-HTTP **200**, raw JSON response:
-
-```json
-[{"handyman_id":1,"initial_amount":1000,"monthly_contribution":100,"annual_rate":12,"years":1,"projected_value":2395.08}]
-```
-
-Rates are annual percentages. Calculations compound monthly with contributions
-at month end, then round to two decimals. Zero rate and zero years are supported.
-No investments returns `[]`. These are projections, not guaranteed returns.
 
 ### 6. DELETE the expense you created
 
@@ -366,7 +337,7 @@ whenever openapi.yaml changes; a teammate can still open the built file without 
 
 ## Scope and blind-test status
 
-The documented provider contract has six operations. Local React-only extensions
+The documented provider contract has four provider operations. Local React-only extensions
 are listed in server/README.md and use separate tables. No provider income,
 savings or investment write API is promised; the quickstart seeds demonstration
 inputs through its trusted setup script.
@@ -398,8 +369,6 @@ PowerShell example (replace placeholders privately):
 ```powershell
 $base = 'http://127.0.0.1:5001'
 $headers = @{ 'X-API-Key' = '<private HandyNear key>'; Authorization = 'Bearer <provider 1 token>' }
-Invoke-RestMethod -Uri "$base/api/handymen/1/savings-goals" -Headers $headers
-Invoke-RestMethod -Uri "$base/api/handymen/1/investment-projections" -Headers $headers
 Invoke-RestMethod -Uri "$base/api/handymen/1/income-summaries?month=2026-10" -Headers $headers
 ```
 

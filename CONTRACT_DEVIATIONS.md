@@ -48,3 +48,6 @@ to HandyNear before relying on its older integration evidence.
 Structural OpenAPI validation and local reference resolution passed using
 @apidevtools/swagger-parser. This is not a claim that Swagger Editor's browser
 validation or a live Swagger Try it out session was completed.
+
+## HandyNear wallet migration - 4 November 2026
+Consumer contract 2.0.0 replaces provider savings/investment reads with simulated customer wallets. Amounts use KES cents, customer JWTs require role=customer, and both topups/payments require idempotency keys. Bookings are provisioned by a trusted local administrator pending cross-team booking import agreement. See WALLET_INTEGRATION.md. Historical test evidence describes the former contract.

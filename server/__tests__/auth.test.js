@@ -2,7 +2,7 @@ const request=require('../test-support/request');
 const jwt=require('jsonwebtoken');
 const {setupProvider}=require('../test-support/provider');
 const s=setupProvider();
-const routes=()=>[['get',`/api/handymen/${s.id}/income-summaries?month=2026-09`],['post',`/api/handymen/${s.id}/expenses`],['get',`/api/handymen/${s.id}/savings-goals`],['get',`/api/handymen/${s.id}/investment-projections`],['patch','/api/expenses/1'],['delete','/api/expenses/1']];
+const routes=()=>[['get',`/api/handymen/${s.id}/income-summaries?month=2026-09`],['post',`/api/handymen/${s.id}/expenses`],['patch','/api/expenses/1'],['delete','/api/expenses/1']];
 test.each(['missing','malformed','expired','wrong-signature','wrong-audience','wrong-issuer','wrong-algorithm','invalid-subject','not-active','no-expiry'])('all contract routes reject %s token',async kind=>{
  let token;
  if(kind==='invalid-subject')token=s.token('abc');
@@ -20,6 +20,6 @@ test.each(['missing','malformed','expired','wrong-signature','wrong-audience','w
  }
 });
 test('provider path cannot expose another provider',async()=>{
- for(const suffix of ['income-summaries?month=2026-09','savings-goals','investment-projections']){const r=await s.call('get',`/api/handymen/${s.other}/${suffix}`);expect(r.status).toBe(404);}
+ for(const suffix of ['income-summaries?month=2026-09']){const r=await s.call('get',`/api/handymen/${s.other}/${suffix}`);expect(r.status).toBe(404);}
  const r=await s.call('post',`/api/handymen/${s.other}/expenses`,{description:'x',category:'Equipment',amount:1,expense_date:'2026-09-29'});expect(r.status).toBe(404);
 });

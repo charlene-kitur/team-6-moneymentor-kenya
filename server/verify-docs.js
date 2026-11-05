@@ -26,15 +26,11 @@ async function main(){
     assert.deepEqual(updated,{...created,amount:3000});
     const summary=await call('GET','/handymen/1/income-summaries?month=2026-09',undefined,200);
     assert.equal(summary.total_expenses,before.total_expenses+3000);
-    const savings=await call('GET','/handymen/1/savings-goals',undefined,200);
-    assert.ok(savings.length>=10); assert.ok(savings.some(row=>row.goal_amount===1000 && row.current_amount===450));
-    const investments=await call('GET','/handymen/1/investment-projections',undefined,200);
-    assert.ok(investments.length>=10); assert.ok(investments.some(row=>row.projected_value===2395.08));
     assert.equal(await call('DELETE',`/expenses/${id}`,undefined,204),null);
     assert.deepEqual(await call('DELETE',`/expenses/${id}`,undefined,404),{error:'Expense not found.'});id=undefined;
     assert.deepEqual(await call('GET','/handymen/1/income-summaries?month=Sept2026',undefined,400),{error:'month must use YYYY-MM format.'});
-    assert.deepEqual(await call('GET','/handymen/1/savings-goals',undefined,401,false),{error:'A valid bearer token is required.'});
-    console.log('PASS: all six endpoint examples, actual status/body checks, 400/401/404 errors, and readback. Demo expense cleaned up.');
+    assert.deepEqual(await call('GET','/handymen/1/income-summaries?month=2026-09',undefined,401,false),{error:'A valid bearer token is required.'});
+    console.log('PASS: retained provider endpoint examples, actual status/body checks, 400/401/404 errors, and readback. Demo expense cleaned up.');
   } finally {if(id)await call('DELETE',`/expenses/${id}`,undefined,204);}
 }
 main().catch(error=>{console.error(error.message);process.exitCode=1;});
