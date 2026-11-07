@@ -51,3 +51,6 @@ validation or a live Swagger Try it out session was completed.
 
 ## HandyNear wallet migration - 4 November 2026
 Consumer contract 2.0.0 replaces provider savings/investment reads with simulated customer wallets. Amounts use KES cents, customer JWTs require role=customer, and both topups/payments require idempotency keys. Bookings are provisioned by a trusted local administrator pending cross-team booking import agreement. See WALLET_INTEGRATION.md. Historical test evidence describes the former contract.
+
+## 7 November 2026: booking registration (2.1.0)
+Added create-only PUT /api/bookings/{bookingId} with API-key-only authentication, as requested by HandyNear. Customer wallet/payment routes retain customer bearer authentication. Customer tokens remain locally issued for each rehearsal.

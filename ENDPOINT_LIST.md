@@ -14,3 +14,5 @@ Base URL ends in /api. All operations require X-API-Key plus a role-appropriate 
 | GET | /customers/{customerId}/wallet/transactions | Own transaction history |
 
 Provider savings-goals and investment-projections endpoints retired at contract 2.0.0. See WALLET_INTEGRATION.md and openapi.yaml for customer tokens and payloads.
+
+Server-to-server booking registration: `PUT /api/bookings/{bookingId}`. API key only; body `{customer_id, handyman_id, amount_cents}`. Creates once (201), rejects existing ID (409).

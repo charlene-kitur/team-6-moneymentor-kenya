@@ -32,6 +32,27 @@ function mountWalletApi(app, db, options = {}) {
     }
   }
 
+  // Server-to-server: the application's API-key middleware runs before this route.
+  app.put('/api/bookings/:bookingId', async (req, res, next) => {
+    const body = req.body;
+    if (!validId(req.params.bookingId) || !body || Array.isArray(body) ||
+        Object.keys(body).length !== 3 ||
+        !Number.isInteger(body.customer_id) || !validId(body.customer_id) ||
+        !Number.isInteger(body.handyman_id) || !validId(body.handyman_id) ||
+        !Number.isSafeInteger(body.amount_cents) || body.amount_cents < 1 || body.amount_cents > MAX_CENTS) {
+      return res.status(400).json({error:'Supply customer_id, handyman_id and amount_cents as positive integers; amount_cents must not exceed 1000000000.'});
+    }
+    try {
+      await db.execute('INSERT INTO wallet_bookings (id,customer_id,handyman_id,amount_cents) VALUES (?,?,?,?)',
+        [Number(req.params.bookingId),body.customer_id,body.handyman_id,body.amount_cents]);
+      res.status(201).json({id:Number(req.params.bookingId),...body,status:'pending',currency:'KES',simulated:true});
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({error:'Booking ID already exists.'});
+      if (error.code === 'ER_NO_REFERENCED_ROW_2') return res.status(404).json({error:'Customer wallet or handyman not found.'});
+      next(error);
+    }
+  });
+
   async function owner(req, res, next) {
     try {
       if (!validId(req.params.customerId)) return res.status(400).json({error: 'Invalid customer ID.'});

@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
   title: MoneyMentor Kenya API
-  version: 2.0.0
+  version: 2.1.0
   description: >-
     HandyNear provider income and expenses plus simulated customer wallets in KES. API key and
     role-appropriate bearer token required. Savings and investment provider routes retired. Routes retain /api
-    prefix.
+    prefix. Booking registration requires only the server-to-server API key.
 servers:
   - url: http://localhost:5001/api
     description: Isolated README demo (npm run start:demo)
@@ -759,6 +759,61 @@ paths:
                 properties:
                   error:
                     type: string
+  /bookings/{bookingId}:
+    put:
+      summary: Register a booking (create-only, server-to-server)
+      operationId: registerBooking
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - customer_id
+                - handyman_id
+                - amount_cents
+              properties:
+                customer_id:
+                  type: integer
+                  minimum: 1
+                  maximum: 2147483647
+                handyman_id:
+                  type: integer
+                  minimum: 1
+                  maximum: 2147483647
+                amount_cents:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000000
+      responses:
+        '201':
+          description: >-
+            Pending booking registered; response includes id, customer_id, handyman_id, amount_cents, status,
+            currency and simulated.
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or invalid API key
+        '404':
+          description: Customer wallet or handyman not found
+        '409':
+          description: Booking ID already exists; existing record unchanged
+        '429':
+          description: Rate limit exceeded
+        '503':
+          description: Database unavailable
 components:
   securitySchemes:
     bearerAuth:

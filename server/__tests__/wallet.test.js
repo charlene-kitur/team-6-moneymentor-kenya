@@ -95,3 +95,20 @@ test('ledger failure rolls back balance, booking and provider income',async()=>{
   const [[income]]=await db.execute('SELECT COUNT(*) AS count FROM provider_income WHERE handyman_id=?',[provider]);expect(income.count).toBe(0);
   expect((await pay('rollback-test')).status).toBe(201);
 });
+
+ test('registration needs API key, but no bearer, and preserves existing booking',async()=>{
+ const path='/api/bookings/'+(booking+1), body={customer_id:customer,handyman_id:provider,amount_cents:700};
+ expect((await require('supertest')(app).put(path).send(body)).status).toBe(401);
+ expect((await request(app).put(path).set('X-API-Key','wrong').send(body)).status).toBe(401);
+ expect((await request(app).put(path).send(body)).status).toBe(201);
+ expect((await request(app).put(path).send({...body,amount_cents:1})).status).toBe(409);
+ const [[row]]=await db.execute('SELECT amount_cents FROM wallet_bookings WHERE id=?',[booking+1]);expect(row.amount_cents).toBe(700);
+ await topup();expect((await call('post',path+'/pay',{},'registered-pay')).status).toBe(201);
+ });
+ test('registration validates fields and foreign IDs',async()=>{
+ const path='/api/bookings/'+(booking+1), body={customer_id:customer,handyman_id:provider,amount_cents:700};
+ for(const invalid of [{}, {...body,amount_cents:-1},{...body,amount_cents:1.5},{...body,customer_id:String(customer)},{...body,extra:1}]) expect((await request(app).put(path).send(invalid)).status).toBe(400);
+ expect((await request(app).put(path).send({...body,customer_id:2147483647})).status).toBe(404);
+ expect((await request(app).put(path).send({...body,handyman_id:2147483647})).status).toBe(404);
+ const results=await Promise.all([request(app).put(path).send(body),request(app).put(path).send(body)]);expect(results.map(r=>r.status).sort()).toEqual([201,409]);
+ });

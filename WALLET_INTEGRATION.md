@@ -1,6 +1,6 @@
 # HandyNear simulated wallet integration
 
-Contract version 2.0.0 uses the existing /api prefix. All amounts in the wallet API are whole KES cents (100 cents = KSh 1). Every wallet response includes simulated: true. Demo credit is freely issued by the top-up route to the authenticated customer.
+Contract version 2.1.0 uses the existing /api prefix. All amounts in the wallet API are whole KES cents (100 cents = KSh 1). Every wallet response includes simulated: true. Demo credit is freely issued by the top-up route to the authenticated customer.
 
 ## Consumer endpoints
 
@@ -10,6 +10,7 @@ Contract version 2.0.0 uses the existing /api prefix. All amounts in the wallet 
 | POST | /handymen/{handymanId}/expenses | API key + handyman bearer |
 | PATCH | /expenses/{expenseId} | API key + handyman bearer |
 | DELETE | /expenses/{expenseId} | API key + handyman bearer |
+| PUT | /bookings/{bookingId} | Server-to-server API key only |
 | GET | /customers/{customerId}/wallet | API key + customer bearer |
 | POST | /customers/{customerId}/wallet/topups | API key + customer bearer + Idempotency-Key |
 | POST | /bookings/{bookingId}/pay | API key + customer bearer + Idempotency-Key |
@@ -23,7 +24,7 @@ The API key identifies HandyNear. A customer JWT has sub equal to the customer I
 
 ## Trusted booking registration
 
-Payment reads the stored booking price and owner. HandyNear and MoneyMentor must agree on the verified booking import process before live integration. The current demo uses a local administrator command. Existing booking IDs cannot be overwritten. The customer cannot submit a payment price.
+Payment reads the stored booking price and owner. HandyNear registers its bookings with PUT /api/bookings/{bookingId}, using its API key on its backend. No bearer token is required for registration. Send exactly {customer_id, handyman_id, amount_cents} with positive integer values. The amount limit is 1000000000 cents. The route returns 201 for a new pending booking, 409 for an existing ID (even if the same payload is repeated), 400 for invalid input, and 404 for an unknown wallet or handyman. The existing local administrator command remains available. Existing booking IDs cannot be overwritten. The customer cannot submit a payment price.
 
 Run from server after wallet-schema.sql has been applied:
 
@@ -72,8 +73,26 @@ New installations run wallet-schema.sql through setup-db.js or setup-demo.js. Ex
 
 ## Handoff checklist
 
-Send HandyNear the updated openapi.yaml and this guide. Agree on shared customer and booking IDs, trusted booking registration, cents and the new customer token role. Restart the API process to serve these routes through the existing tunnel. The previous provider savings route will then return 404. Replace old saved consumer handoff instructions before sharing credentials again.
+Send HandyNear the updated openapi.yaml and this guide. Use the shared IDs and registration route below, integer cents and customer-role tokens. Restart the API process to serve these routes through the existing tunnel. The previous provider savings route will then return 404. Replace old saved consumer handoff instructions before sharing credentials again.
 
 ## Verified on 4 November 2026
 
 123 backend tests passed across 15 suites, including 16 wallet tests using MySQL. Coverage includes concurrent duplicate topups/payments, competing bookings with insufficient total balance, role/ownership checks, price tampering, key conflicts and an injected ledger failure proving rollback of wallet balance, booking status and income. Demo customer 1 and pending booking 1 (KSh 500) have been provisioned in the existing demo database. The running API requires a restart to load this migration.
+
+## Team 7 rehearsal handoff — 7 November 2026
+
+Demo database IDs verified: 1 John Mwangi, 2 Grace Wanjiru, 3 Peter Otieno. Customers 1 and 2 are provisioned with wallets; existing balances are preserved. Booking IDs are HandyNear IDs, used unchanged. Booking 1 already exists from the earlier demo and will return 409; inspect/coordinate this existing booking before reusing that ID. Never overwrite it automatically.
+
+Register a booking from HandyNear backend with X-API-Key and JSON Content-Type. Example body: {"customer_id":1,"handyman_id":1,"amount_cents":50000}. Keep the API key off the browser. Payment still requires the customer bearer token and Idempotency-Key.
+
+Generate fresh one-hour tokens before each rehearsal/presentation from server:
+
+```powershell
+node wallet-admin.js token 1
+node wallet-admin.js token 2
+Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"
+```
+
+The current tokens and API key are in server/.env.wallet-handoff.txt, ignored by Git; share privately. No public token endpoint has been added. Restart the API to load the registration route.
+
+Verification after registration changes: 125 tests passed across 15 suites, including missing/wrong API keys, registration without bearer, duplicate and concurrent registration, field validation, unknown foreign IDs, and payment of an API-registered booking.
